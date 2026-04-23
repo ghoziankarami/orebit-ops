@@ -1,0 +1,300 @@
+require('dotenv').config()
+const express = require('express')
+const cors = require('cors')
+const rateLimit = require('express-rate-limit')
+const { execFileSync } = require('child_process')
+const path = require('path')
+const validation = require('./validation')
+
+const app = express()
+const rawEnv = process.env
+const envConfig = validation.validateEnvConfig(rawEnv)
+const PORT = Number(envConfig.PORT || 3004)
+const HOST = envConfig.RAG_API_HOST || '127.0.0.1'
+const DATA_PROVIDER = path.join(__dirname, 'rag_public_data.py')
+const STATS_TTL_MS = Number(envConfig.RAG_STATS_TTL_MS || 60_000)
+const RESPONSE_CACHE_TTL_MS = Number(envConfig.RAG_RESPONSE_CACHE_TTL_MS || 5 * 60 * 1000)
+const RESPONSE_CACHE_MAX_ENTRIES = 256
+
+app.set('trust proxy', 1)
+
+// Security: API Key (environment variable)
+const API_KEY = envConfig.RAG_API_KEY
+
+// Security: Rate limiting
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.'
+})
+
+app.use(cors())
+app.use(limiter)
+app.use(express.json({ limit: '1mb' }))
+
+function isLoopbackRequest(req) {
+  const socketIp = req.socket?.remoteAddress || ''
+  const forwardedIp = req.ip || ''
+  const loopbacks = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1'])
+  return loopbacks.has(socketIp) || loopbacks.has(forwardedIp)
+}
+
+function validateApiKey(req, res, next) {
+  if (isLoopbackRequest(req)) {
+    return next()
+  }
+
+  const providedKey = req.headers['x-api-key']
+
+  if (!providedKey || providedKey !== API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' })
+  }
+
+  next()
+}
+
+app.use('/api/rag', validateApiKey)
+
+const statsCache = {
+  data: null,
+  expiresAt: 0,
+}
+
+const responseCaches = {
+  search: new Map(),
+  answer: new Map(),
+}
+
+function runProvider(command, args = []) {
+  const output = execFileSync('python3', [DATA_PROVIDER, command, ...args], {
+    cwd: __dirname,
+    encoding: 'utf8',
+    maxBuffer: 20 * 1024 * 1024,
+    env: process.env,
+  })
+
+  const trimmed = String(output || '').trim()
+  if (!trimmed) {
+    throw new Error('Empty response from data provider')
+  }
+
+  try {
+    return JSON.parse(trimmed)
+  } catch (error) {
+    throw new Error(`Invalid JSON from data provider: ${trimmed.slice(0, 400)}`)
+  }
+}
+
+function getStatsCached({ force = false } = {}) {
+  const now = Date.now()
+  if (!force && statsCache.data && statsCache.expiresAt > now) {
+    return statsCache.data
+  }
+
+  const data = runProvider('stats')
+  statsCache.data = data
+  statsCache.expiresAt = now + STATS_TTL_MS
+  return data
+}
+
+function getCachedResponse(cacheName, cacheKey) {
+  const cache = responseCaches[cacheName]
+  if (!cache) {
+    return null
+  }
+
+  const entry = cache.get(cacheKey)
+  if (!entry) {
+    return null
+  }
+
+  if (entry.expiresAt <= Date.now()) {
+    cache.delete(cacheKey)
+    return null
+  }
+
+  return entry.data
+}
+
+function setCachedResponse(cacheName, cacheKey, data) {
+  const cache = responseCaches[cacheName]
+  if (!cache) {
+    return data
+  }
+
+  cache.set(cacheKey, {
+    data,
+    expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS,
+  })
+
+  while (cache.size > RESPONSE_CACHE_MAX_ENTRIES) {
+    const oldestKey = cache.keys().next().value
+    if (oldestKey === undefined) {
+      break
+    }
+    cache.delete(oldestKey)
+  }
+
+  return data
+}
+
+function buildSearchCacheKey(query, top_k) {
+  return JSON.stringify({ query, top_k: Number(top_k) })
+}
+
+function buildAnswerCacheKey(query, top_k, history) {
+  return JSON.stringify({
+    query,
+    top_k: Number(top_k),
+    history: Array.isArray(history) ? history : [],
+  })
+}
+
+function handleSearchRequest(req, res) {
+  try {
+    const validated = validation.validateSearchBody(req.body)
+    const { query, top_k } = validated
+    const cacheKey = buildSearchCacheKey(query, top_k)
+    const cached = getCachedResponse('search', cacheKey)
+
+    if (cached) {
+      return res.json(cached)
+    }
+
+    const data = runProvider('search', ['--query', query, '--top-k', String(top_k)])
+    // Normalize provider response to ensure type safety
+    const results = Array.isArray(data.results) ? data.results : []
+    const rawTotal = data.total
+    const total = (rawTotal != null && !isNaN(Number(rawTotal))) ? Number(rawTotal) : results.length
+    const response = {
+      query: query,
+      top_k: Number(top_k),
+      results,
+      total,
+    }
+    return res.json(setCachedResponse('search', cacheKey, response))
+  } catch (err) {
+    console.error('[RAG API] Search error:', err)
+    if (err.type === 'validation_error') {
+      return res.status(400).json({ error: 'Validation error', details: err.errors, message: err.message })
+    }
+    return res.status(500).json({ error: 'Internal server error', message: String(err.message || err) })
+  }
+}
+
+app.post('/api/rag/search', handleSearchRequest)
+
+app.post('/api/rag/query', handleSearchRequest)
+
+app.get('/api/rag/query', (req, res) => {
+  return res.status(405).json({ error: 'Method not allowed' })
+})
+
+app.get('/api/rag/browse', (req, res) => {
+  try {
+    const validated = validation.validateBrowseQuery(req.query)
+    const { page, limit } = validated
+    const data = runProvider('browse', ['--page', String(page), '--limit', String(limit)])
+    // Normalize: ensure papers is an array
+    const normalized = {
+      ...data,
+      papers: Array.isArray(data.papers) ? data.papers : []
+    }
+    return res.json(normalized)
+  } catch (err) {
+    console.error('[RAG API] Browse error:', err)
+    if (err.type === 'validation_error') {
+      return res.status(400).json({ error: 'Validation error', details: err.errors, message: err.message })
+    }
+    return res.status(500).json({ error: 'Internal server error', message: String(err.message || err) })
+  }
+})
+
+app.get('/api/rag/stats', (req, res) => {
+  try {
+    const validated = validation.validateStatsQuery(req.query)
+    const { refresh } = validated
+    const data = getStatsCached({ force: refresh })
+    return res.json(data)
+  } catch (err) {
+    console.error('[RAG API] Stats error:', err)
+    if (err.type === 'validation_error') {
+      return res.status(400).json({ error: 'Validation error', details: err.errors, message: err.message })
+    }
+    return res.status(500).json({ error: 'Internal server error', message: String(err.message || err) })
+  }
+})
+
+app.post('/api/rag/answer', (req, res) => {
+  try {
+    const validated = validation.validateAnswerBody(req.body)
+    const { query, top_k, history } = validated
+    const cacheKey = buildAnswerCacheKey(query, top_k, history)
+    const cached = getCachedResponse('answer', cacheKey)
+
+    if (cached) {
+      return res.json(cached)
+    }
+
+    const args = ['--query', query, '--top-k', String(top_k)]
+    if (history && history.length > 0) {
+      args.push('--history', JSON.stringify(history))
+    }
+
+    const data = runProvider('answer', args)
+    // Normalize response to ensure frontend safety
+    const normalized = {
+      ...data,
+      answer: typeof data.answer === 'string' ? data.answer : '',
+      sources: Array.isArray(data.sources) ? data.sources : []
+    }
+    return res.json(setCachedResponse('answer', cacheKey, normalized))
+  } catch (err) {
+    console.error('[RAG API] Answer error:', err)
+    if (err.type === 'validation_error') {
+      return res.status(400).json({ error: 'Validation error', details: err.errors, message: err.message })
+    }
+    return res.status(500).json({ error: 'Internal server error', message: String(err.message || err) })
+  }
+})
+
+app.get('/api/rag/health', (req, res) => {
+  try {
+    const stats = getStatsCached()
+    return res.json({
+      status: 'healthy',
+      service: 'rag-api-wrapper',
+      version: stats.version || '2.0.0',
+      timestamp: new Date().toISOString(),
+      mode: stats.mode || 'public_read_only',
+      llm_model: stats.llm_model || null,
+      llm_ready: Boolean(stats.llm_ready),
+      corpus: {
+        indexed_papers: stats.indexed_papers || 0,
+        summary_count: stats.summary_count || 0,
+        collection_count: stats.collection_count || 0,
+      },
+      cache_ttl_ms: STATS_TTL_MS,
+    })
+  } catch (err) {
+    console.error('[RAG API] Health error:', err)
+    return res.json({
+      status: 'degraded',
+      service: 'rag-api-wrapper',
+      timestamp: new Date().toISOString(),
+      error: String(err.message || err),
+    })
+  }
+})
+
+app.use((err, req, res, next) => {
+  console.error('[RAG API] Error:', err)
+  res.status(500).json({ error: 'Internal server error' })
+})
+
+app.listen(PORT, HOST, () => {
+  console.log(`[RAG API] Server running on http://${HOST}:${PORT}`)
+  console.log(`[RAG API] Health check: http://${HOST}:${PORT}/api/rag/health`)
+  console.log('[RAG API] Security: API key validation ENABLED')
+  console.log('[RAG API] Security: Rate limiting ENABLED (100 req/min)')
+})

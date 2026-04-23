@@ -1,0 +1,37 @@
+# Secrets
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.crt
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Runtime data
+chroma/*.sqlite3
+chroma/*.wal
+chroma/*.shm
+chroma/UUID_*
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
