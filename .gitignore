@@ -5,6 +5,7 @@
 *.key
 *.pem
 *.crt
+rclone.conf
 
 # Dependencies
 node_modules/
@@ -19,6 +20,18 @@ chroma/*.sqlite3
 chroma/*.wal
 chroma/*.shm
 chroma/UUID_*
+chroma/*.json
+
+# Vault content (large)
+obsidian-system/vault/**/*.md
+!obsidian-system/vault/README.md
+!obsidian-system/vault/.obsidian/
+
+# Research data content (large)
+research-data/nala/**/*.json
+research-data/orebit/**/*.md
+research-data/papers-index/**/*.md
+!research-data/*/README.md
 
 # Logs
 *.log

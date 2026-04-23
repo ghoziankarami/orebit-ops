@@ -1,0 +1,19 @@
+{
+  "database": "Zotero",
+  "noteImportFolder": "Zotero",
+  "pdfExportImageDPI": 120,
+  "pdfExportImageFormat": "jpg",
+  "pdfExportImageQuality": 90,
+  "citeFormats": [
+    {
+      "name": "Format #1",
+      "format": "formatted-citation",
+      "cslStyle": "norsk-apa-manual-note"
+    }
+  ],
+  "exportFormats": [],
+  "citeSuggestTemplate": "[[{{citekey}}]]",
+  "openNoteAfterImport": true,
+  "whichNotesToOpenAfterImport": "first-imported-note",
+  "exeOverridePath": "C:\\pdfannots2json.exe"
+}

@@ -1,0 +1,71 @@
+# Nala Auto-Paper Pipeline Configuration — Geology Indonesia & Saudi Arabia
+# Focus: High-credibility, peer-reviewed sources only
+# Specific keywords: economic geology, mineral exploration, ore deposits
+
+topics:
+  # Indonesia — specific geology & mineral deposits
+  - "economic geology Indonesia"
+  - "mineral exploration Indonesia"
+  - "ore deposits Indonesia"
+  - "gold mineralization Indonesia"
+  - "copper porphyry Indonesia"
+  - "volcanic massive sulfide Indonesia"
+
+  # Saudi Arabia — specific geology & mineral deposits
+  - "economic geology Saudi Arabia"
+  - "mineral exploration Saudi Arabia"
+  - "ore deposits Saudi Arabia"
+  - "gold mineralization Saudi Arabia"
+  - "copper porphyry Saudi Arabia"
+  - " limestone aquifers Saudi Arabia"
+
+search:
+  max_papers_per_topic: 10
+  max_age_days: 1825  # 5 years (geology classics can be older but prefer recent)
+  min_citations: 5  # Require at least 5 citations (skip very new papers may fail this)
+  sources:
+    # High-credibility primary sources
+    - "usgs.gov"           # US Geological Survey (gold standard)
+    - "sgs.gov.sa"          # Saudi Geological Survey
+    - "bgs.ac.uk"           # British Geological Survey
+    - "ga.gov.au"           # Geoscience Australia
+    - "gov.uk/geological"   # UK Geological Survey
+    
+    # Top-tier journals (publisher domains)
+    - "nature.com"
+    - "science.org"
+    - "elsevier.com"
+    - "springer.com"
+    - "wiley.com"
+    - "journals.aps.org"    # Physical Review
+    - "pnas.org"
+    - "geoscienceworld.org" # GSA, AAPG, etc.
+    - "seg.org"             # SEG conference
+    - "aapg.org"            # AAPG
+    
+    # Allow arXiv ONLY if no journal version exists (marked as preprint)
+    - "arxiv.org"
+
+  # Quality blacklist — reject papers with these signals
+  reject_if:
+    - "call for papers"
+    - "special issue"
+    - "reviewed"
+    - "scopus indexed"
+    - "fast publication"
+    - "pay to publish"
+    - "predatory"
+    - "spam"
+    - "unverified"
+
+output:
+  log_file: "/var/log/nala-paper-autoflow-geology.log"
+  tracker_db: "/workspace/research/paper-tracker/papers.json"
+  pdf_dir: "/mnt/gdrive/AI_Knowledge"
+  notes_dir: "/data/obsidian/3. Resources/Papers"
+
+# Quality scoring threshold (0-100)
+min_quality_score: 70
+
+# If true, will actually download and process. If false, dry-run only.
+execute: true

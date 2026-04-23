@@ -1,0 +1,18 @@
+{
+  "quickadd:choice:66fea217-8cda-45de-b5cf-aac483e6e362": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "Q"
+    }
+  ],
+  "templater-obsidian:Templates/Timestamp.md": [
+    {
+      "modifiers": [
+        "Alt"
+      ],
+      "key": "T"
+    }
+  ]
+}

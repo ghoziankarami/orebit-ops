@@ -1,0 +1,48 @@
+# Nala Auto-Paper Pipeline Configuration
+# Topics to search continuously for new papers
+
+# Used by scripts/agents/nala/paper-autoflow.py (peer-reviewed / publisher-indexed lane)
+topics:
+  - "geostatistics mineral exploration"
+  - "geostatistics machine learning geology"
+  - "spatial statistics geological modeling"
+  - "mineral exploration machine learning"
+  - "geology indonesia mineral exploration"
+  - "indonesia geology remote sensing mineral"
+  - "indonesia tin deposit geology"
+  - "indonesia geostatistics geology"
+  - "saudi arabia geology mineral exploration"
+  - "saudi arabia geological survey mineral deposits"
+  - "arabian shield geology mineralization"
+  - "saudi groundwater geology remote sensing"
+
+# Used by scripts/vector/daily_arxiv_discovery.py (high-quality arXiv lane)
+arxiv_queries:
+  - "all:geostatistics machine learning geology"
+  - "all:mineral exploration machine learning"
+  - "all:geology indonesia remote sensing"
+  - "all:saudi arabia geology remote sensing"
+  - "all:physics informed neural networks geoscience"
+
+# paper-autoflow.py currently reads these from top-level keys
+max_papers_per_topic: 8
+max_age_days: 3650
+
+search:
+  sources:
+    - "crossref"
+    - "sciencedirect.com"
+    - "springer.com"
+    - "mdpi.com"
+    - "usgs.gov"
+    - "sgs.gov.sa"
+
+output:
+  log_file: "/var/log/nala-paper-autoflow.log"
+  tracker_db: "/workspace/research/paper-tracker/papers.json"
+  pdf_dir: "/mnt/gdrive/AI_Knowledge"
+  notes_dir: "/data/obsidian/3. Resources/Papers"
+  arxiv_log_file: "/var/log/daily-arxiv-discovery.log"
+
+# Quality filtering
+min_citations: 0

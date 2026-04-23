@@ -1,0 +1,12 @@
+[gdrive]
+type = drive
+scope = drive
+token = {"access_token":"YOUR_TOKEN_HERE","token_type":"Bearer","refresh_token":"YOUR_REFRESH_TOKEN_HERE","expiry":"2026-01-01T00:00:00.000000000Z"}
+root_folder_id = YOUR_ROOT_FOLDER_ID
+
+# Setup instructions:
+# 1. Run: rclone config
+# 2. Create new remote named "gdrive"
+# 3. Choose "Google Drive" as type
+# 4. Follow OAuth flow to authenticate
+# 5. Copy the resulting config here or use rclone directly

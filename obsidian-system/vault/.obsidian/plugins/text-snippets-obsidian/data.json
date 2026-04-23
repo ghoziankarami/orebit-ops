@@ -1,0 +1,14 @@
+{
+  "snippets_file": "fold : %% fold %%",
+  "snippets": [
+    "fold : %% fold %%"
+  ],
+  "endSymbol": "$end$",
+  "newlineSymbol": "$nl$",
+  "stopSymbol": "$tb$",
+  "pasteSymbol": "$pst$",
+  "useTab": true,
+  "useSpace": false,
+  "wordDelimiters": "$()[]{}<>,.!?;:'\"\\/",
+  "isWYSIWYG": true
+}
