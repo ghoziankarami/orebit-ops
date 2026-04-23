@@ -204,3 +204,37 @@ ls /workspace/obsidian-system/vault/
 ls /workspace/research-data/nala/
 ls /workspace/rag-system/chroma/
 ```
+
+## Data Sync via Google Drive (rclone)
+
+Files NOT in this repo (vault content, Chroma DB, secrets) are synced to GDrive:
+
+```
+gdrive:orebit-workspace-backup/
+├── obsidian-system/
+│   ├── vault/              # Markdown files
+│   └── .obsidian/          # Config (no plugins/themes)
+├── rag-system/
+│   └── chroma/             # Vector DB
+├── research-data/          # Nala configs, paper tracker
+├── env-files/              # .env files (secrets)
+└── rclone-config/          # rclone.conf
+```
+
+### Backup (from VPS)
+
+```bash
+bash infra-template/sync-to-gdrive.sh
+```
+
+### Restore (on Qwenpaw)
+
+```bash
+bash infra-template/sync-to-gdrive.sh --restore
+```
+
+### Dry Run (preview only)
+
+```bash
+bash infra-template/sync-to-gdrive.sh --dry-run
+```
