@@ -29,12 +29,13 @@ cp infra-template/.env.template .env
 Optional deploy secret file for automation:
 
 ```bash
-mkdir -p ~/.openclaw
-cat > ~/.openclaw/secrets.env <<'EOF'
+mkdir -p ~/.orebit
+cat > ~/.orebit/secrets.env <<'EOF'
 RAG_API_BASE=https://api.orebit.id/api/rag
 RAG_API_KEY=replace-me
 VERCEL_TOKEN=replace-me
 EOF
+# Legacy fallback is still supported at ~/.openclaw/secrets.env during migration
 ```
 
 ## Step 3 - Bootstrap local runtime

@@ -51,7 +51,7 @@ Do not treat port `8503` as the canonical public deployment target.
 
 1. Clone the repo to `/workspace/orebit-rag-deploy`.
 2. Copy `infra-template/.env.template` to `.env` and fill required local/runtime secrets.
-3. Copy `secrets.env.template` to `~/.openclaw/secrets.env` and fill deploy secrets for Vercel and public API access.
+3. Copy `secrets.env.template` to `~/.orebit/secrets.env` and fill deploy secrets for Vercel and public API access. During migration, scripts still fall back to `~/.openclaw/secrets.env` if the new path is missing.
 4. Run `python3 scripts_preflight_validate.py`.
 5. Run `bash infra-template/install.sh`.
 6. Run `python3 scripts_postflight_verify.py`.

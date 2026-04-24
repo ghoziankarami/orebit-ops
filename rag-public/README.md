@@ -14,9 +14,9 @@ This is the live UI source for `rag.orebit.id` after cutover; the legacy Streaml
 
 2. Check the canonical secrets file first:
    ```bash
-   test -f ~/.openclaw/secrets.env && grep '^VERCEL_TOKEN=' ~/.openclaw/secrets.env
+   test -f ~/.orebit/secrets.env && grep '^VERCEL_TOKEN=' ~/.orebit/secrets.env
    ```
-   If the token is missing, then either add it to `~/.openclaw/secrets.env` or login once and sync it there.
+   If the token is missing, then either add it to `~/.orebit/secrets.env` or login once and sync it there. Legacy fallback at `~/.openclaw/secrets.env` is still supported during migration.
 
 ### Deployment Steps
 

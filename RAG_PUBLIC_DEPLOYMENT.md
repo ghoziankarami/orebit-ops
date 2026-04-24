@@ -40,7 +40,8 @@ Store these outside Git:
 Recommended locations:
 
 - repo `.env` for local/runtime bootstrap as needed
-- `$HOME/.openclaw/secrets.env` for deploy automation
+- `$HOME/.orebit/secrets.env` for deploy automation
+- `$HOME/.openclaw/secrets.env` as temporary legacy fallback during migration
 - `$HOME/.config/vercel/token` as fallback token location
 
 ## Deploy the public UI
