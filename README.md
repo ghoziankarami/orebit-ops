@@ -7,7 +7,7 @@ Single source of truth for deploying the complete Orebit workspace on Qwenpaw or
 | Component | Purpose | Deploy Method |
 |---|---|---|
 | `infra-template/` | Master installer + env templates | `bash install.sh` |
-| `rag-system/` | RAG API + Dashboard + Chroma DB | Docker Compose |
+| `rag-system/` | RAG API + Dashboard + Chroma DB | `bash rag-system/install.sh` |
 | `obsidian-system/` | PARA vault + capture workflow | Symlink + restore |
 | `research-data/` | Nala scripts + Orebit planning | Install script |
 
@@ -27,9 +27,10 @@ bash infra-template/install.sh
 ```
 
 This will:
-- Check/install Docker, Python 3, rclone
-- Create workspace structure
+- Validate Docker, Python 3, curl, and rclone are available
+- Run preflight checks against `.env` and runtime layout
 - Run component installers
+- Run postflight verification
 
 ### 3. Configure
 
@@ -139,6 +140,8 @@ orebit-rag-deploy/
 │   ├── .env.template           # Environment template
 │   ├── .env.example            # Example env
 │   └── rclone.conf.template    # Rclone config template
+├── BOOTSTRAP.md                # Operator and agent bootstrap guide
+├── AGENTS.md                   # Repo instructions for future agents
 ├── rag-system/
 │   ├── Dockerfile              # Multi-stage build
 │   ├── docker-compose.yml      # Service definitions

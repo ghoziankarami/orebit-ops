@@ -21,6 +21,12 @@ chroma/*.wal
 chroma/*.shm
 chroma/UUID_*
 chroma/*.json
+rag-system/chroma/
+rag-system/.vector_db/
+
+# Runtime caches and generated files
+rag-system/__pycache__/
+rag-system/*.pyc
 
 # Vault content (large)
 obsidian-system/vault/**/*.md
