@@ -54,3 +54,8 @@ Thumbs.db
 # Build artifacts
 dist/
 build/
+rag-public/dist/
+rag-public/node_modules/
+
+# Local runtime process files
+rag-system/dashboard_local.pid

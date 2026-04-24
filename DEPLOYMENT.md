@@ -1,93 +1,102 @@
-# Orebit RAG Deployment Guide
+# Orebit Deployment Guide
 
-## Quick Start
+This repo can bootstrap the local Orebit RAG stack and also deploy the canonical public `rag.orebit.id` frontend.
 
-### 1. Clone the repo
+## Canonical deployment map
+
+- `rag.orebit.id` -> `rag-public/` -> Vercel
+- `rag.orebit.id/api/rag/*` -> API wrapper on port `3004`
+- local `8503` -> fallback/local Streamlit dashboard only
+
+If your goal is the public showcase domain, use `rag-public/` and the Vercel deploy path.
+
+## Step 1 - Clone
 
 ```bash
 git clone https://github.com/ghoziankarami/orebit-rag-deploy.git
 cd orebit-rag-deploy
 ```
 
-### 2. Set up environment
+## Step 2 - Prepare secrets
+
+Create or update your local secret sources:
 
 ```bash
 cp infra-template/.env.template .env
-# Edit .env with your actual values
+# fill RAG_API_KEY and related runtime values
 ```
 
-### 3. Deploy
+Optional deploy secret file for automation:
+
+```bash
+mkdir -p ~/.openclaw
+cat > ~/.openclaw/secrets.env <<'EOF'
+RAG_API_BASE=https://api.orebit.id/api/rag
+RAG_API_KEY=replace-me
+VERCEL_TOKEN=replace-me
+EOF
+```
+
+## Step 3 - Bootstrap local runtime
 
 ```bash
 bash infra-template/install.sh
-```
-
-### 4. Verify
-
-```bash
 python3 scripts_preflight_validate.py
 python3 scripts_postflight_verify.py
+```
 
-# Check endpoints directly
-curl -sS http://127.0.0.1:8503/_stcore/health
+## Step 4 - Verify local API
+
+```bash
 curl -sS http://127.0.0.1:3004/api/rag/health
 curl -sS -X POST http://127.0.0.1:3004/api/rag/query \
   -H 'Content-Type: application/json' \
   -d '{"query":"test","top_k":1}'
-curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3004/api/rag/query
-# Last command should return 405 (GET not allowed)
 ```
 
-## Migration to Qwenpaw
+## Step 5 - Deploy public `rag.orebit.id`
 
-### Data Migration
-
-Data besar (Chroma DB, Obsidian vault, research data) **tidak masuk repo**. Migrasi dilakukan terpisah:
-
-1. **Backup dari VPS lama**:
-   ```bash
-   tar czf /tmp/rag-data-backup.tar.gz /workspace/rag-system/chroma
-   tar czf /tmp/obsidian-backup.tar.gz /workspace/obsidian-system/vault
-   tar czf /tmp/research-backup.tar.gz /workspace/research-data
-   ```
-
-2. **Restore di Qwenpaw**:
-   ```bash
-   tar xzf rag-data-backup.tar.gz -C /workspace/rag-system/
-   tar xzf obsidian-backup.tar.gz -C /workspace/obsidian-system/
-   tar xzf research-backup.tar.gz -C /workspace/
-   ```
-
-3. **Deploy**:
-   ```bash
-   bash infra-template/install.sh
-   ```
-
-## Repo Structure
-
-```
-orebit-rag-deploy/
-├── infra-template/          # Deployment entry point
-│   ├── install.sh           # Master installer
-│   ├── .env.template        # Environment template
-│   └── README.md            # Full deployment guide
-├── BOOTSTRAP.md             # Bootstrap and operator guide
-├── AGENTS.md                # Repo instructions for future agents
-├── rag-system/              # RAG container stack
-│   ├── Dockerfile           # Multi-stage build
-│   ├── docker-compose.yml   # Service definitions
-│   ├── .dockerignore        # Build exclusions
-│   └── api-wrapper/         # API source code
-├── research-data/           # Nala datasets & Orebit planning
-└── obsidian-system/         # PARA vault structure
+```bash
+bash scripts_deploy_rag_public_vercel.sh
 ```
 
-## What's NOT in this repo
+Expected outcome:
 
-- `.env` files with secrets
-- Runtime Chroma DB data
-- Obsidian vault content
-- Research PDFs and large datasets
-- `node_modules/`, `__pycache__/`, logs, backups
+- `rag-public/` builds successfully
+- Vercel env vars are synced when token is available
+- production deploy is created
+- custom domain `rag.orebit.id` serves the public UI
 
-These should be migrated separately via backup/restore or mounted volumes.
+## Step 6 - Verify public surface
+
+```bash
+curl -sk https://rag.orebit.id | head
+curl -sk https://rag.orebit.id/api/rag/health
+```
+
+## Local fallback dashboard
+
+Use this only as a local fallback when you need a simple server-side surface:
+
+```bash
+/workspace/orebit-rag-deploy/rag-system/run_dashboard_local.sh
+curl -sS http://127.0.0.1:8503/_stcore/health
+```
+
+This is not the canonical public domain deployment path.
+
+## Data migration
+
+Large runtime data still needs backup/restore outside Git:
+
+- `rag-system/chroma/`
+- `obsidian-system/vault/`
+- `research-data/`
+
+## Recommended operator order
+
+1. restore data
+2. verify local API on `3004`
+3. deploy `rag-public/` to Vercel
+4. verify `rag.orebit.id`
+5. use `8503` only for fallback/local inspection if needed
