@@ -25,11 +25,11 @@ bash infra-template/install.sh
 ### 4. Verify
 
 ```bash
-# Check services
-systemctl is-active rag-dashboard-advanced rag-api-wrapper
+python3 scripts_preflight_validate.py
+python3 scripts_postflight_verify.py
 
-# Check endpoints
-curl -sS http://127.0.0.1:8503 >/dev/null && echo "Dashboard: OK"
+# Check endpoints directly
+curl -sS http://127.0.0.1:8503/_stcore/health
 curl -sS http://127.0.0.1:3004/api/rag/health
 curl -sS -X POST http://127.0.0.1:3004/api/rag/query \
   -H 'Content-Type: application/json' \
@@ -71,6 +71,8 @@ orebit-rag-deploy/
 │   ├── install.sh           # Master installer
 │   ├── .env.template        # Environment template
 │   └── README.md            # Full deployment guide
+├── BOOTSTRAP.md             # Bootstrap and operator guide
+├── AGENTS.md                # Repo instructions for future agents
 ├── rag-system/              # RAG container stack
 │   ├── Dockerfile           # Multi-stage build
 │   ├── docker-compose.yml   # Service definitions

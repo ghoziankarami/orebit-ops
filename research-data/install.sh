@@ -3,26 +3,32 @@ set -euo pipefail
 
 echo "=== Research Data Setup ==="
 
-NALA_DIR="/workspace/research-data/nala"
-OREBIT_DIR="/workspace/research-data/orebit"
-PAPERS_DIR="/workspace/research-data/papers-index"
+RUNTIME_ROOT="/workspace/research-data"
+NALA_DIR="$RUNTIME_ROOT/nala"
+OREBIT_DIR="$RUNTIME_ROOT/orebit"
+PAPERS_DIR="$RUNTIME_ROOT/papers-index"
+PAPERS_MOUNT="/mnt/gdrive/AI_Knowledge"
+OBSIDIAN_PAPERS_DIR="/data/obsidian/3. Resources/Papers"
 
-# Verify structure
+mkdir -p "$NALA_DIR" "$OREBIT_DIR" "$PAPERS_DIR"
+mkdir -p "$OBSIDIAN_PAPERS_DIR"
+
 for dir in "$NALA_DIR" "$OREBIT_DIR" "$PAPERS_DIR"; do
-    if [ -d "$dir" ]; then
-        echo "OK: $dir"
-    else
-        echo "MISSING: $dir"
-        exit 1
-    fi
+  if [ -d "$dir" ]; then
+    echo "OK: $dir"
+  else
+    echo "ERROR: missing $dir"
+    exit 1
+  fi
 done
 
-# Check rclone mount
-if mount | grep -q gdrive; then
-    echo "OK: rclone gdrive mount active"
+if command -v mountpoint >/dev/null 2>&1 && mountpoint -q "$PAPERS_MOUNT"; then
+  echo "OK: rclone gdrive mount active at $PAPERS_MOUNT"
+elif [ -d "$PAPERS_MOUNT" ]; then
+  echo "WARN: $PAPERS_MOUNT exists but is not a confirmed mountpoint"
 else
-    echo "WARN: rclone gdrive mount not found"
-    echo "Run: rclone mount gdrive:AI_Knowledge /mnt/gdrive/AI_Knowledge --daemon"
+  echo "WARN: rclone gdrive mount not found"
+  echo "Run: rclone mount gdrive:AI_Knowledge /mnt/gdrive/AI_Knowledge --daemon"
 fi
 
 echo "Research data structure ready"
