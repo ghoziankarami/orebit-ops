@@ -1,6 +1,6 @@
 # Orebit Deployment Guide
 
-This repo can bootstrap the local Orebit RAG stack and also deploy the canonical public `rag.orebit.id` frontend.
+This repo is the deploy/bootstrap source-of-truth for the canonical public `rag.orebit.id` frontend plus the supporting local Orebit RAG runtime.
 
 ## Canonical deployment map
 

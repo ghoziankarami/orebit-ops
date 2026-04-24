@@ -1,6 +1,6 @@
 # Orebit Workspace Deployment
 
-Single source of truth for deploying Orebit RAG, PARA second-brain, and the public `rag.orebit.id` surface from one repo.
+Single source of truth for deploying the public `rag.orebit.id` frontend, the supporting RAG API/runtime, and the PARA/research bootstrap from one repo.
 
 ## What this repo owns
 
