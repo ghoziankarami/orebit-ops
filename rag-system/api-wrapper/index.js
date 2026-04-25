@@ -1,9 +1,10 @@
+const path = require('path')
 require('dotenv').config()
+require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env'), override: false })
 const express = require('express')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 const { execFileSync } = require('child_process')
-const path = require('path')
 const validation = require('./validation')
 
 const app = express()

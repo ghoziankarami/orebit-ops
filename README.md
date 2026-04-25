@@ -1,27 +1,80 @@
-# Orebit Workspace Deployment
+# Orebit Canonical Workspace
 
-Single source of truth for deploying the public `rag.orebit.id` frontend, the supporting RAG API/runtime, and the PARA/research bootstrap from one repo.
+Canonical repository for the Orebit stack that is currently being operated through QwenPaw.
+
+This repo is not only a deployment bundle. It is the canonical home for three connected workflows:
+
+- Orebit RAG full workflow
+- Obsidian PARA / second-brain capture workflow
+- QwenPaw-facing runtime and operator workflow for this stack
 
 ## What this repo owns
 
-| Component | Purpose | Canonical deploy method |
+| Area | Purpose | Canonical location |
 |---|---|---|
-| `rag-public/` | Public frontend for `rag.orebit.id` | Vercel via `bash scripts_deploy_rag_public_vercel.sh` |
-| `rag-system/api-wrapper/` | Public RAG API wrapper | VPS service / local process on port `3004` |
-| `rag-system/` | Local RAG data, Chroma, fallback dashboard | local bootstrap / fallback runtime |
-| `obsidian-system/` | PARA vault + capture workflow | local bootstrap |
-| `research-data/` | Research structure and second-brain feed | local bootstrap |
-| `infra-template/` | Bootstrap helpers and env templates | `bash infra-template/install.sh` |
+| Public RAG UI | Public frontend for `rag.orebit.id` | `rag-public/` |
+| Local RAG runtime | API wrapper, local data, fallback dashboard | `rag-system/` |
+| Second brain | PARA vault structure and capture model | `obsidian-system/` |
+| Research data | Research and paper workspace layout | `research-data/` |
+| Bootstrap and deploy | Installation, validation, deploy helpers | root docs + `infra-template/` |
+| QwenPaw bridge | Applied runtime notes and workflow docs | `docs/qwenpaw/` |
+| Canonical workflows | RAG and second-brain operational docs | `docs/workflows/` |
 
-## Canonical rule
+## Canonical boundaries
 
-For the public showcase domain:
+Use this repo as the source of truth for:
 
-- `rag.orebit.id` is the Vercel-hosted UI from `rag-public/`
-- `rag.orebit.id/api/rag/*` is served by the API wrapper
-- local Streamlit on `8503` is fallback/local only
+- bootstrap and deployment
+- RAG workflow
+- second-brain/PARA workflow
+- QwenPaw-facing operational notes that are verified and relevant to this stack
 
-If you want the final public surface, do not treat `8503` as the canonical deployment target.
+Do not use this repo as a dumping ground for every historical OpenClaw document.
+Only migrate material that is active, verified, and useful.
+
+## Read this first
+
+### Core docs
+
+- `BOOTSTRAP.md`
+- `DEPLOYMENT.md`
+- `RAG_PUBLIC_DEPLOYMENT.md`
+- `docs/CANONICAL_AUDIT_2026-04-25.md`
+- `docs/setup/RCLONE_SETUP.md`
+
+### Canonical workflows
+
+- `docs/workflows/RAG_FULL_WORKFLOW.md`
+- `docs/workflows/RAG_OBSIDIAN_REMOTE_CACHE_VERIFIED.md`
+- `docs/workflows/RAG_RUNTIME_RELOAD_AND_LLM.md`
+- `docs/workflows/SECOND_BRAIN_CAPTURE_WORKFLOW.md`
+- `docs/qwenpaw/QWENPAW_NEW_SYSTEM.md`
+
+### Applied-state references
+
+- `docs/QWENPAW_RUNTIME_APPLIED.md`
+- `docs/QWENPAW_CRON_APPLIED.md`
+- `docs/MIGRATION_QWENPAW_CANONICAL_GAP.md`
+
+## Runtime map
+
+### Public surfaces
+
+- public UI: `https://rag.orebit.id`
+- public API path: `https://rag.orebit.id/api/rag/*`
+
+### Local runtime
+
+- local API: `http://127.0.0.1:3004`
+- local fallback dashboard: `http://127.0.0.1:8503`
+- local 9router: `http://127.0.0.1:20128/v1`
+
+### Main live paths
+
+- repo source: `/workspace/orebit-rag-deploy`
+- live vault root: `/workspace/obsidian-system`
+- live research-data root: `/workspace/research-data`
+- QwenPaw runtime root: `/app/working`
 
 ## Quick start
 
@@ -32,86 +85,48 @@ git clone https://github.com/ghoziankarami/orebit-rag-deploy.git
 cd orebit-rag-deploy
 ```
 
-### 2. Configure local env
+### 2. Prepare env
 
 ```bash
 cp infra-template/.env.template .env
-# Edit .env with your actual values
+# Fill real values
 ```
 
-### 3. Bootstrap local/runtime pieces
+### 3. Bootstrap
 
 ```bash
 bash infra-template/install.sh
 ```
 
-### 4. Deploy the public frontend
+### 4. Verify local runtime
+
+```bash
+curl -sS http://127.0.0.1:3004/api/rag/health
+curl -sS http://127.0.0.1:8503/_stcore/health
+```
+
+### 5. Deploy public UI
 
 ```bash
 bash scripts_deploy_rag_public_vercel.sh
 ```
 
-## Verification
+## Verification habits
 
-### Public surface
+- verify live runtime before claiming docs are correct
+- keep secrets and runtime databases out of Git
+- treat fallback local surfaces as fallback, not as public canonical targets
+- prefer repo-documented workflows over stale chat memory
 
-```bash
-curl -sk https://rag.orebit.id | head
-curl -sk https://rag.orebit.id/api/rag/health
-```
+## Current migration stance
 
-### Local API
-
-```bash
-curl -sS http://127.0.0.1:3004/api/rag/health
-curl -sS -X POST http://127.0.0.1:3004/api/rag/query \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"test","top_k":1}'
-```
-
-### Local fallback dashboard
-
-```bash
-curl -sS http://127.0.0.1:8503/_stcore/health
-```
-
-## Important docs
-
-- `RAG_PUBLIC_DEPLOYMENT.md` - canonical public deployment for `rag.orebit.id`
-- `DEPLOYMENT.md` - end-to-end deployment overview for this repo
-- `BOOTSTRAP.md` - bootstrap guidance
-- `DOCKER_HOST_FIX.md` - host Docker troubleshooting for optional local container flows
-
-## Repo structure
-
-```text
-orebit-rag-deploy/
-├── rag-public/                       # canonical public UI source for rag.orebit.id
-├── rag-system/
-│   ├── api-wrapper/                  # API wrapper source
-│   ├── rag_dashboard_local.py        # fallback local dashboard
-│   └── run_dashboard_local.sh        # fallback dashboard runner
-├── obsidian-system/                  # PARA vault structure
-├── research-data/                    # research and second-brain data layout
-├── infra-template/                   # bootstrap helpers
-├── scripts_deploy_rag_public_vercel.sh
-├── RAG_PUBLIC_DEPLOYMENT.md
-└── DEPLOYMENT.md
-```
+`openclaw-workspace` is now a migration source, not the canonical home for this stack.
+This repo should be kept smaller, cleaner, and more trustworthy.
 
 ## What is not in Git
 
-- real secrets
-- production `.env`
-- Vercel token
-- Chroma runtime data backups
+- production secrets
+- runtime databases
 - vault content backups
 - research PDFs and large datasets
-- `node_modules/`, logs, and generated caches
-
-## Deployment summary
-
-- Public UI: `rag-public/` -> Vercel -> `rag.orebit.id`
-- Public API: `rag-system/api-wrapper/` -> port `3004`
-- Fallback local dashboard: Streamlit -> port `8503`
-- PARA/research/bootstrap: local filesystem + scripts
+- generated caches and logs

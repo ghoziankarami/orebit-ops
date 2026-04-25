@@ -62,9 +62,12 @@ Do not treat port `8503` as the canonical public deployment target.
 
 - real API keys in `.env`
 - deploy secrets in `~/.openclaw/secrets.env`
-- optional Google Drive `rclone` config in `~/.config/rclone/rclone.conf`
-- optional Google Drive mount at `/mnt/gdrive/AI_Knowledge`
+- working Google Drive `rclone` config in `~/.config/rclone/rclone.conf`
+- active Google Drive mount at `/mnt/gdrive/AI_Knowledge` for paper workflows
 - Vercel CLI availability or deploy token when shipping the public UI
+
+Do not count a placeholder `rclone.conf` as a completed setup.
+Use `docs/setup/RCLONE_SETUP.md` to reconnect or create the remotes correctly.
 
 ## Agent/operator checklist
 
