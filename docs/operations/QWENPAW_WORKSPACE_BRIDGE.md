@@ -13,9 +13,9 @@ Container resets can detach `/workspace/` mount.
 
 ## Repo Location
 ```
-/app/working/workspaces/default/orebit-rag-deploy/
+/app/working/workspaces/default/orebit-ops/
 ```
-(Cloned from GitHub: `https://github.com/ghoziankarami/orebit-rag-deploy`)
+(Cloned from GitHub: `https://github.com/ghoziankarami/orebit-ops`)
 (Branch: `feat/bootstrap-secondbrain-sync`)
 
 ## Key Files in QwenPaw Workspace

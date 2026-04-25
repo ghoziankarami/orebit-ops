@@ -2,7 +2,7 @@
 
 ## ⚠️ CONTAINER RESET NOTE
 **`/workspace/` mount detached after container reset (2026-04-25).**
-Repo re-cloned to: `/app/working/workspaces/default/orebit-rag-deploy/`
+Repo re-cloned to: `/app/working/workspaces/default/orebit-ops/`
 All scripts and configs are being rebuilt here.
 
 ## Services (running on host)

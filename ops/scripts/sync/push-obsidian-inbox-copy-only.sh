@@ -7,7 +7,7 @@ set -euo pipefail
 REMOTE="gdrive-obsidian"
 LOCAL_VAULT="${VAULT_PATH:-/workspace/obsidian-system/vault}"
 INBOX_DIR="0. Inbox"
-LOG_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/docs/audits/sync"
+LOG_DIR="/app/working/workspaces/default/orebit-ops/docs/audits/sync"
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/obsidian-inbox-push-$(date +%Y%m%dT%H%M%SZ).log"

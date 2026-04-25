@@ -12,7 +12,7 @@ INBOX_DIR="0. Inbox"
 DAEMON_LOCK="/tmp/obsidian-inbox-autosync.lock"
 DAEMON_PID="/tmp/obsidian-inbox-autosync.pid"
 DAEMON_STATUS="/tmp/obsidian-inbox-autosync.status"
-LOG_DIR="/app/working/workspaces/default/orebit-rag-deploy/docs/audits/sync"
+LOG_DIR="/app/working/workspaces/default/orebit-ops/docs/audits/sync"
 LOG_FILE="${LOG_DIR}/obsidian-inbox-autosync-$(date +%Y%m%dT%H%M%SZ).log"
 
 mkdir -p "$LOG_DIR"

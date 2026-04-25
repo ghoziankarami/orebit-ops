@@ -64,7 +64,7 @@ Last updated: 2026-04-25
 ---
 
 ## 🔑 Key Paths
-- Repo: `/app/working/workspaces/default/orebit-rag-deploy/` (cloned from GitHub)
+- Repo: `/app/working/workspaces/default/orebit-ops/` (cloned from GitHub)
 - Vault: `/workspace/obsidian-system/vault`
 - Obsidian Inbox sync: `ops/scripts/sync/`
 - Capture: `ops/scripts/capture/`
