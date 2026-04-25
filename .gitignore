@@ -59,3 +59,9 @@ rag-public/node_modules/
 
 # Local runtime process files
 rag-system/dashboard_local.pid
+
+# Autosync temp files (local only, never commit)
+.rclone-bisync-workdir/
+/tmp/obsidian-inbox-autosync.*
+/tmp/obsidian-inbox-autosync-*.status
+/tmp/obsidian-inbox-autosync-*.log
