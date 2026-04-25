@@ -1,17 +1,82 @@
-# Orebit Workspace Deployment
+# Orebit Canonical Workspace
 
-Single source of truth for deploying the complete Orebit workspace on Qwenpaw or any fresh VPS.
+Canonical repository for the Orebit stack that is currently being operated through QwenPaw.
 
-## What's Included
+This repo is not only a deployment bundle. It is the canonical home for three connected workflows:
 
-| Component | Purpose | Deploy Method |
+- Orebit RAG full workflow
+- Obsidian PARA / second-brain capture workflow
+- QwenPaw-facing runtime and operator workflow for this stack
+
+## What this repo owns
+
+| Area | Purpose | Canonical location |
 |---|---|---|
-| `infra-template/` | Master installer + env templates | `bash install.sh` |
-| `rag-system/` | RAG API + Dashboard + Chroma DB | `bash rag-system/install.sh` |
-| `obsidian-system/` | PARA vault + capture workflow | Symlink + restore |
-| `research-data/` | Nala scripts + Orebit planning | Install script |
+| Public RAG UI | Public frontend for `rag.orebit.id` | `rag-public/` |
+| Local RAG runtime | API wrapper, local data, fallback dashboard | `rag-system/` |
+| Second brain | PARA vault structure and capture model | `obsidian-system/` |
+| Research data | Research and paper workspace layout | `research-data/` |
+| Bootstrap and deploy | Installation, validation, deploy helpers | root docs + `infra-template/` |
+| QwenPaw bridge | Applied runtime notes and workflow docs | `docs/qwenpaw/` |
+| Canonical workflows | RAG and second-brain operational docs | `docs/workflows/` |
 
-## Quick Start
+## Canonical boundaries
+
+Use this repo as the source of truth for:
+
+- bootstrap and deployment
+- RAG workflow
+- second-brain/PARA workflow
+- QwenPaw-facing operational notes that are verified and relevant to this stack
+
+Do not use this repo as a dumping ground for every historical OpenClaw document.
+Only migrate material that is active, verified, and useful.
+
+## Read this first
+
+### Core docs
+
+- `BOOTSTRAP.md`
+- `DEPLOYMENT.md`
+- `RAG_PUBLIC_DEPLOYMENT.md`
+- `docs/CANONICAL_AUDIT_2026-04-25.md`
+- `docs/setup/RCLONE_SETUP.md`
+
+### Canonical workflows
+
+- `docs/workflows/RAG_FULL_WORKFLOW.md`
+- `docs/workflows/RAG_OBSIDIAN_REMOTE_CACHE_VERIFIED.md`
+- `docs/workflows/RAG_RUNTIME_RELOAD_AND_LLM.md`
+- `docs/workflows/SECOND_BRAIN_CAPTURE_WORKFLOW.md`
+- `docs/qwenpaw/QWENPAW_NEW_SYSTEM.md`
+
+### Applied-state references
+
+- `docs/QWENPAW_RUNTIME_APPLIED.md`
+- `docs/QWENPAW_CRON_APPLIED.md`
+- `docs/MIGRATION_QWENPAW_CANONICAL_GAP.md`
+
+## Runtime map
+
+### Public surfaces
+
+- public UI: `https://rag.orebit.id`
+- public API path: `https://rag.orebit.id/api/rag/*`
+
+### Local runtime
+
+- local API: `http://127.0.0.1:3004`
+- local fallback dashboard: `http://127.0.0.1:8503`
+- local 9router: `http://127.0.0.1:20128/v1`
+
+### Main live paths
+
+- repo source: `/workspace/orebit-rag-deploy`
+- live vault root: `/workspace/obsidian-system`
+- live research-data root: `/workspace/research-data`
+- QwenPaw runtime root: `/app/working`
+
+## Quick start
 
 ### 1. Clone
 
@@ -20,224 +85,48 @@ git clone https://github.com/ghoziankarami/orebit-rag-deploy.git
 cd orebit-rag-deploy
 ```
 
-### 2. Install
-
-```bash
-bash infra-template/install.sh
-```
-
-This will:
-- Validate Docker, Python 3, curl, and rclone are available
-- Run preflight checks against `.env` and runtime layout
-- Run component installers
-- Run postflight verification
-
-### 3. Configure
+### 2. Prepare env
 
 ```bash
 cp infra-template/.env.template .env
-# Edit .env with your actual values
+# Fill real values
 ```
 
-### 4. Restore Data
-
-Data is NOT in this repo. Restore from backup:
+### 3. Bootstrap
 
 ```bash
-# Obsidian vault
-tar xzf obsidian-backup.tar.gz -C /workspace/obsidian-system/
-
-# Research data
-tar xzf research-backup.tar.gz -C /workspace/
-
-# RAG Chroma DB
-tar xzf rag-chroma-backup.tar.gz -C /workspace/rag-system/
-```
-
-### 5. Configure Rclone
-
-```bash
-rclone config
-# Create "gdrive" remote for Google Drive
-# Or copy your existing rclone.conf to ~/.config/rclone/
-```
-
-### 6. Verify
-
-```bash
-# Services
-systemctl is-active rag-dashboard-advanced rag-api-wrapper
-
-# Endpoints
-curl -sS http://127.0.0.1:8503 >/dev/null && echo "Dashboard: OK"
-curl -sS http://127.0.0.1:3004/api/rag/health
-curl -sS -X POST http://127.0.0.1:3004/api/rag/query \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"test","top_k":1}'
-curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3004/api/rag/query
-# Last should return 405 (GET not allowed)
-
-# Rclone
-ls /mnt/gdrive/AI_Knowledge | head
-```
-
-## Migration from VPS
-
-### On Old VPS (Before Shutdown)
-
-```bash
-# Create backup directory
-mkdir -p /tmp/workspace-backup
-
-# Backup Obsidian vault
-tar czf /tmp/workspace-backup/obsidian-backup.tar.gz \
-  -C /workspace/obsidian-system vault
-
-# Backup research data
-tar czf /tmp/workspace-backup/research-backup.tar.gz \
-  -C /workspace/research-data .
-
-# Backup RAG Chroma DB
-tar czf /tmp/workspace-backup/rag-chroma-backup.tar.gz \
-  -C /workspace/rag-system chroma
-
-# Backup rclone config
-cp ~/.config/rclone/rclone.conf /tmp/workspace-backup/
-
-# Download backups to local machine
-scp user@vps:/tmp/workspace-backup/*.tar.gz ./
-```
-
-### On Qwenpaw (After Clone)
-
-```bash
-# Restore Obsidian
-tar xzf obsidian-backup.tar.gz -C /workspace/obsidian-system/
-
-# Restore research data
-tar xzf research-backup.tar.gz -C /workspace/research-data/
-
-# Restore Chroma DB
-tar xzf rag-chroma-backup.tar.gz -C /workspace/rag-system/
-
-# Restore rclone config
-mkdir -p ~/.config/rclone
-cp rclone.conf ~/.config/rclone/
-
-# Mount Google Drive
-rclone mount gdrive:AI_Knowledge /mnt/gdrive/AI_Knowledge --daemon
-
-# Start services
 bash infra-template/install.sh
 ```
 
-## Repo Structure
-
-```
-orebit-rag-deploy/
-├── infra-template/
-│   ├── install.sh              # Master installer
-│   ├── .env.template           # Environment template
-│   ├── .env.example            # Example env
-│   └── rclone.conf.template    # Rclone config template
-├── BOOTSTRAP.md                # Operator and agent bootstrap guide
-├── AGENTS.md                   # Repo instructions for future agents
-├── rag-system/
-│   ├── Dockerfile              # Multi-stage build
-│   ├── docker-compose.yml      # Service definitions
-│   ├── .dockerignore           # Build exclusions
-│   ├── .env.example            # RAG env example
-│   ├── install.sh              # RAG installer
-│   └── api-wrapper/            # API source code
-├── obsidian-system/
-│   ├── install.sh              # Obsidian setup
-│   └── vault/                  # Vault structure
-│       └── .obsidian/          # Obsidian config
-├── research-data/
-│   ├── install.sh              # Research data setup
-│   ├── nala/                   # Nala scripts + configs
-│   ├── orebit/                 # Orebit planning data
-│   └── papers-index/           # Paper metadata
-└── .gitignore                  # Git exclusions
-```
-
-## What's NOT in This Repo
-
-- `.env` files with secrets
-- Obsidian vault content (markdown files)
-- Chroma DB runtime data
-- Research PDFs and large datasets
-- `node_modules/`, `__pycache__/`, logs, backups
-
-These should be migrated separately via backup/restore.
-
-## Services
-
-| Service | Port | Purpose |
-|---|---|---|
-| `rag-dashboard-advanced` | 8503 | RAG Dashboard |
-| `rag-api-wrapper` | 3004 | RAG API |
-| `hermes-gateway` | - | Gateway runtime |
-| `caddy` | 80/443 | Reverse proxy |
-
-## Troubleshooting
-
-### Dashboard not loading
-```bash
-systemctl restart rag-dashboard-advanced
-curl http://127.0.0.1:8503
-```
-
-### API not responding
-```bash
-systemctl restart rag-api-wrapper
-curl http://127.0.0.1:3004/api/rag/health
-```
-
-### Rclone mount missing
-```bash
-rclone mount gdrive:AI_Knowledge /mnt/gdrive/AI_Knowledge --daemon
-ls /mnt/gdrive/AI_Knowledge
-```
-
-### Data not showing
-```bash
-# Verify backup was restored correctly
-ls /workspace/obsidian-system/vault/
-ls /workspace/research-data/nala/
-ls /workspace/rag-system/chroma/
-```
-
-## Data Sync via Google Drive (rclone)
-
-Files NOT in this repo (vault content, Chroma DB, secrets) are synced to GDrive:
-
-```
-gdrive:orebit-workspace-backup/
-├── obsidian-system/
-│   ├── vault/              # Markdown files
-│   └── .obsidian/          # Config (no plugins/themes)
-├── rag-system/
-│   └── chroma/             # Vector DB
-├── research-data/          # Nala configs, paper tracker
-├── env-files/              # .env files (secrets)
-└── rclone-config/          # rclone.conf
-```
-
-### Backup (from VPS)
+### 4. Verify local runtime
 
 ```bash
-bash infra-template/sync-to-gdrive.sh
+curl -sS http://127.0.0.1:3004/api/rag/health
+curl -sS http://127.0.0.1:8503/_stcore/health
 ```
 
-### Restore (on Qwenpaw)
+### 5. Deploy public UI
 
 ```bash
-bash infra-template/sync-to-gdrive.sh --restore
+bash scripts_deploy_rag_public_vercel.sh
 ```
 
-### Dry Run (preview only)
+## Verification habits
 
-```bash
-bash infra-template/sync-to-gdrive.sh --dry-run
-```
+- verify live runtime before claiming docs are correct
+- keep secrets and runtime databases out of Git
+- treat fallback local surfaces as fallback, not as public canonical targets
+- prefer repo-documented workflows over stale chat memory
+
+## Current migration stance
+
+`openclaw-workspace` is now a migration source, not the canonical home for this stack.
+This repo should be kept smaller, cleaner, and more trustworthy.
+
+## What is not in Git
+
+- production secrets
+- runtime databases
+- vault content backups
+- research PDFs and large datasets
+- generated caches and logs

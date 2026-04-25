@@ -39,11 +39,16 @@ warnings.filterwarnings(
 import requests
 
 WORKSPACE = Path('/workspace/rag-system')
-PAPERS_DB = WORKSPACE / '.vector_db' / 'papers'
+REPO_ROOT = Path('/workspace/orebit-rag-deploy')
+LEGACY_PAPERS_DB = WORKSPACE / '.vector_db' / 'papers'
+REPO_PAPERS_DB = REPO_ROOT / 'rag-system' / 'chroma'
+PAPERS_DB = LEGACY_PAPERS_DB if (LEGACY_PAPERS_DB / 'chroma.sqlite3').exists() else REPO_PAPERS_DB
 CHROMA_SQLITE = PAPERS_DB / 'chroma.sqlite3'
-INDEX_STATE_PAPERS = PAPERS_DB / 'index_state_papers.json'
+INDEX_STATE_PAPERS = LEGACY_PAPERS_DB / 'index_state_papers.json'
 PAPERS_COLLECTION = 'papers'
 SUMMARIES_COLLECTION = 'papers_summary'
+PAPERS_COLLECTION_FALLBACKS = ('papers', 'research_papers')
+SUMMARIES_COLLECTION_FALLBACKS = ('papers_summary',)
 OBSIDIAN_PAPERS_DIR = Path('/data/obsidian/3. Resources/Papers')
 ACTIVE_PDF_ROOT = Path('/mnt/gdrive/AI_Knowledge')
 TRACKER_PATH = WORKSPACE / 'research' / 'paper-tracker' / 'papers.json'
@@ -1052,10 +1057,19 @@ class PaperRagStore:
         self._cache: dict[str, Any] = {}
 
     def collection(self, name: str):
-        try:
-            return self.client.get_collection(name)
-        except Exception:
-            return None
+        candidates = [name]
+        if name == PAPERS_COLLECTION:
+            candidates = list(PAPERS_COLLECTION_FALLBACKS)
+        elif name == SUMMARIES_COLLECTION:
+            candidates = list(SUMMARIES_COLLECTION_FALLBACKS)
+        for candidate in candidates:
+            try:
+                collection = self.client.get_collection(candidate)
+                if collection is not None:
+                    return collection
+            except Exception:
+                continue
+        return None
 
     def count(self, name: str) -> int:
         collection = self.collection(name)
@@ -1625,7 +1639,8 @@ def main() -> int:
     p_answer.add_argument('--history', type=str, default='[]')
 
     args = parser.parse_args()
-    store = SafePaperRagStore()
+    use_live_store = CHROMA_SQLITE.exists() and PAPERS_DB == REPO_PAPERS_DB
+    store = PaperRagStore() if use_live_store else SafePaperRagStore()
 
     if args.command == 'stats':
         print(json.dumps(store.stats(), ensure_ascii=False))

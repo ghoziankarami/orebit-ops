@@ -1,0 +1,10 @@
+﻿streamlit
+chromadb
+requests
+numpy
+pandas
+PyYAML
+folium
+plotly
+matplotlib
+seaborn

@@ -41,14 +41,15 @@ fi
 # Check rclone config
 if ! rclone listremotes | grep -q "^${REMOTE}:"; then
     echo "ERROR: rclone remote '${REMOTE}' not configured."
-    echo "Run: rclone config"
+    echo "Run: rclone config or see docs/setup/RCLONE_SETUP.md"
     exit 1
 fi
 
-# Check GDrive mount
+# Check backup remote accessibility
 if ! rclone lsd "${REMOTE}:" &>/dev/null; then
-    echo "ERROR: Cannot access GDrive remote '${REMOTE}'."
-    echo "Check your rclone config and network connection."
+    echo "ERROR: Cannot access Google Drive remote '${REMOTE}'."
+    echo "The OAuth token may be stale; run: rclone config reconnect ${REMOTE}:"
+    echo "See also: docs/setup/RCLONE_SETUP.md"
     exit 1
 fi
 

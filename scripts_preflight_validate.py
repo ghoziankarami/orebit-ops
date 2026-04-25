@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import sys
 from pathlib import Path
@@ -35,6 +36,13 @@ OPTIONAL_ENV_KEYS = [
     'TELEGRAM_BOT_TOKEN',
 ]
 
+PLACEHOLDER_MARKERS = [
+    'YOUR_ACCESS_TOKEN_HERE',
+    'YOUR_REFRESH_TOKEN_HERE',
+    'YOUR_TOKEN_HERE',
+    'YOUR_ROOT_FOLDER_ID',
+]
+
 
 def load_env(path: Path):
     values = {}
@@ -59,6 +67,51 @@ def warn(msg):
 
 def fail(msg):
     print(f'FAIL {msg}')
+
+
+def parse_rclone_remotes(path: Path):
+    remotes = {}
+    current = None
+    if not path.exists():
+        return remotes
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith('#'):
+            continue
+        if line.startswith('[') and line.endswith(']'):
+            current = line[1:-1].strip()
+            remotes[current] = {}
+            continue
+        if current and '=' in line:
+            key, value = line.split('=', 1)
+            remotes[current][key.strip()] = value.strip()
+    return remotes
+
+
+def rclone_remote_status(remotes, name):
+    remote = remotes.get(name)
+    if not remote:
+        return 'missing', f"rclone remote '{name}' is missing"
+
+    remote_type = remote.get('type', '')
+    if remote_type == 'alias':
+        target = remote.get('remote', '')
+        if any(marker in target for marker in PLACEHOLDER_MARKERS):
+            return 'invalid', f"rclone alias '{name}' points to placeholder data"
+        return 'ok', f"rclone alias '{name}' -> {target}"
+
+    token = remote.get('token', '')
+    if not token:
+        return 'invalid', f"rclone remote '{name}' has no token"
+    if any(marker in token for marker in PLACEHOLDER_MARKERS):
+        return 'invalid', f"rclone remote '{name}' still uses placeholder token values"
+    try:
+        token_data = json.loads(token)
+    except json.JSONDecodeError:
+        return 'invalid', f"rclone remote '{name}' has unreadable token JSON"
+    if not token_data.get('refresh_token'):
+        return 'invalid', f"rclone remote '{name}' has no refresh token"
+    return 'ok', f"rclone remote '{name}' has a non-placeholder refresh token"
 
 
 def main():
@@ -118,6 +171,15 @@ def main():
 
     if RCLONE_FILE.exists():
         ok(f'found rclone config {RCLONE_FILE}')
+        remotes = parse_rclone_remotes(RCLONE_FILE)
+        for remote_name in ['gdrive', 'gdrive-obsidian', 'gdrive-research']:
+            status, message = rclone_remote_status(remotes, remote_name)
+            if status == 'ok':
+                ok(message)
+            elif status == 'missing':
+                warn(message)
+            else:
+                warn(message)
     else:
         warn(f'rclone config missing at {RCLONE_FILE}')
 
@@ -125,7 +187,7 @@ def main():
     if gdrive_mount.exists():
         ok(f'found Google Drive mount {gdrive_mount}')
     else:
-        warn(f'Google Drive mount missing at {gdrive_mount}')
+        warn(f'Google Drive mount missing at {gdrive_mount}; see docs/setup/RCLONE_SETUP.md')
 
     return 1 if failed else 0
 
