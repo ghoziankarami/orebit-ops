@@ -4,14 +4,14 @@ Use this runbook to understand the current rclone and Google Drive position for 
 
 ## Current canonical state
 
-The current system treats Google Drive as the intended cross-device source of truth for the Obsidian vault, but not yet as a fully trusted write path from this runtime.
+The current system treats Google Drive as the intended cross-device source of truth for the Obsidian vault.
 
 What is true now:
 - `rclone` read access to the shared `Obsidian` folder works
 - the connected folder is the real existing Google Drive `Obsidian` vault
 - local vault work happens at `/app/working/workspaces/default/obsidian-system/vault`
 - service-account write is still blocked in practice
-- OAuth-based write finalization is still pending
+- OAuth-based write is now configured and verified for inbox push
 
 ## Current remote expectation
 
@@ -77,6 +77,16 @@ Important scripts include:
 ## Canonical interpretation
 
 - Google Drive is the intended long-term source of truth across devices
-- this runtime currently trusts Drive read more than Drive write
-- local vault cleanup can proceed without assuming write-back is ready
-- inbox-first automation remains the safest default sync model
+- this runtime uses split remotes: service-account read plus OAuth write
+- local vault cleanup can proceed without opening full-vault write automation
+- inbox-first automation remains the default sync model
+
+## Recovery notes
+
+If auth breaks again, recover in this order:
+- verify `/root/.config/rclone/rclone.conf` still contains both `gdrive-obsidian` and `gdrive-obsidian-oauth`
+- verify both remotes still point at `root_folder_id = 1a33hipwORSMZh3pKOMvB4PjMQzvvJFGI`
+- test read with `rclone lsd gdrive-obsidian:`
+- test write with `rclone lsd gdrive-obsidian-oauth:`
+- if OAuth expired or was lost, recreate it with `rclone authorize` using the Google OAuth web client and paste the token back into `rclone.conf`
+- keep `sync-inbox-pull.sh` on the read remote and `sync-inbox-push.sh` on the OAuth remote

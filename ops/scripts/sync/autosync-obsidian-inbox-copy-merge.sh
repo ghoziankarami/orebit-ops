@@ -6,11 +6,11 @@
 
 set -euo pipefail
 
-REMOTE="gdrive-obsidian"
+READ_REMOTE="gdrive-obsidian"
+WRITE_REMOTE="gdrive-obsidian-oauth"
 LOCAL_VAULT="/app/working/workspaces/default/obsidian-system/vault"
 INBOX_DIR="0. Inbox"
-DAEMON_LOCK="/tmp/obsidian-inbox-autosync.lock"
-DAEMON_PID="/tmp/obsidian-inbox-autosync.pid"
+SYNC_LOCK="/tmp/obsidian-inbox-autosync.sync.lock"
 DAEMON_STATUS="/tmp/obsidian-inbox-autosync.status"
 LOG_DIR="/app/working/workspaces/default/orebit-ops/docs/audits/sync"
 LOG_FILE="${LOG_DIR}/obsidian-inbox-autosync-$(date +%Y%m%dT%H%M%SZ).log"
@@ -28,23 +28,22 @@ check_scope() {
     log "SCOPE VERIFIED: Only syncing '$INBOX_DIR'"
 }
 
-# Lock to prevent concurrent runs
+# Lock to prevent overlapping sync cycles while allowing the daemon to stay alive.
 acquire_lock() {
-    if [[ -f "$DAEMON_LOCK" ]]; then
-        old_pid=$(cat "$DAEMON_LOCK" 2>/dev/null || echo "")
+    if [[ -f "$SYNC_LOCK" ]]; then
+        old_pid=$(cat "$SYNC_LOCK" 2>/dev/null || echo "")
         if [[ -n "$old_pid" ]] && kill -0 "$old_pid" 2>/dev/null; then
-            log "Already running (PID $old_pid), skip."
+            log "Sync already running (PID $old_pid), skip."
             exit 0
         fi
-        log "Stale lock found (PID $old_pid), removing."
-        rm -f "$DAEMON_LOCK" "$DAEMON_PID"
+        log "Stale sync lock found (PID $old_pid), removing."
+        rm -f "$SYNC_LOCK"
     fi
-    echo $$ > "$DAEMON_LOCK"
-    echo $$ > "$DAEMON_PID"
+    echo $$ > "$SYNC_LOCK"
 }
 
 release_lock() {
-    rm -f "$DAEMON_LOCK" "$DAEMON_PID"
+    rm -f "$SYNC_LOCK"
 }
 
 # HARDENING filter: EXPLICITLY block all folders except 0. Inbox
@@ -82,11 +81,11 @@ run() {
 
     log "START autosync cycle (PID $$)"
 
-    # Sync: Drive → Local
-    do_sync "${REMOTE}:/${INBOX_DIR}" "${LOCAL_VAULT}/${INBOX_DIR}" "GDrive→Local"
+    # Sync: Drive -> Local uses the service-account remote for reliable reads.
+    do_sync "${READ_REMOTE}:/${INBOX_DIR}" "${LOCAL_VAULT}/${INBOX_DIR}" "GDrive->Local"
 
-    # Sync: Local → Drive (copy-merge, no deletes)
-    do_sync "${LOCAL_VAULT}/${INBOX_DIR}" "${REMOTE}:/${INBOX_DIR}" "Local→GDrive"
+    # Sync: Local -> Drive uses the OAuth remote for write capability.
+    do_sync "${LOCAL_VAULT}/${INBOX_DIR}" "${WRITE_REMOTE}:/${INBOX_DIR}" "Local->GDrive"
 
     log "END autosync cycle OK"
 

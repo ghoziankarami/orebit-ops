@@ -31,7 +31,8 @@
 | Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings` |
 | Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + sentence-transformers, no Docker |
 | Obsidian Vault | — | ✅ Yes | ✅ Present | `/app/working/workspaces/default/obsidian-system/vault` |
-| Google Drive read access | — | ✅ Yes | ✅ Read-only practical | Folder is visible through rclone; write not yet stable |
+| Google Drive read access | — | ✅ Yes | ✅ Healthy | Folder is visible through rclone service-account remote |
+| Google Drive inbox write access | — | ✅ Yes | ✅ Healthy | OAuth remote tested with small write/delete and used for inbox push |
 | RAG API (old Docker) | 3004 | ❌ No | ❌ Deprecated | Replaced by local no-Docker stack |
 | Streamlit | 8503 | ❌ No | ❌ Not running | Old host-era service, not canonical |
 
@@ -42,9 +43,9 @@
 ## Orebit Repo
 
 - **Repo:** `https://github.com/ghoziankarami/orebit-ops`
-- **Branch:** `feat/bootstrap-secondbrain-sync`
+- **Branch:** `main`
 - **Local path:** `/app/working/workspaces/default/orebit-ops`
-- **Reset procedure:** `cd /app/working/workspaces/default && rm -rf orebit-ops && git clone -b feat/bootstrap-secondbrain-sync https://github.com/ghoziankarami/orebit-ops`
+- **Reset procedure:** `cd /app/working/workspaces/default && rm -rf orebit-ops && git clone https://github.com/ghoziankarami/orebit-ops`
 
 ---
 
@@ -75,7 +76,7 @@ All silent — write to files only, no Telegram messages.
 | Orebit Runtime Heartbeat | `4ef3ddcf-...` | `*/15 * * * *` | ✅ Active | none |
 | Orebit Runtime Audit | `8e998c92-...` | `0 */6 * * *` | ✅ Active | none |
 
-> The autosync-related jobs should be treated as conditional until OAuth-based rclone write access is finalized.
+> The autosync watchdog cron is active and the inbox push path now uses the OAuth write remote.
 
 ---
 
@@ -187,11 +188,11 @@ Important current lanes include:
 |--------|--------|-------|
 | Remote folder discovery | ✅ | Existing `Obsidian` folder visible via `root_folder_id` |
 | Read access | ✅ | `rclone lsd gdrive-obsidian:` works |
-| Write access | ⚠️ | Service-account writes still fail with `storageQuotaExceeded` |
-| OAuth finalization | 🟡 | Deferred; not complete yet |
+| Write access | ✅ | OAuth remote works; service-account writes still fail with `storageQuotaExceeded` |
+| OAuth finalization | ✅ | Separate OAuth write remote configured and tested |
 | Full vault pull completeness | 🟡 | Partial local mirror present; full clean sync still pending |
 
-**Canonical interpretation:** rclone is usable for read verification today, but not yet a fully trusted write path.
+**Canonical interpretation:** rclone now uses a split-remote model: service account for read and OAuth for inbox write.
 
 ---
 
@@ -199,9 +200,9 @@ Important current lanes include:
 
 | Priority | Gap | Blocker |
 |----------|-----|---------|
-| 🟡 MED | OAuth-based rclone write path | Manual browser auth still pending |
 | 🟡 MED | Clean full vault sync verification | Need one non-overlapping final sync/check |
 | 🟡 MED | QwenPaw memory search end-to-end validation | Embedding server is working, full workflow still needs explicit test |
+| 🟡 MED | Full vault sync verification | Need one non-overlapping final sync/check |
 | 🟡 MED | Example typed captures for geology/exploration/offshore/SOP/image requests | Workflow exists, examples still need to be populated |
 | 🟢 LOW | GitHub CLI `gh` authentication | `gh` is installed, but not yet logged in |
 | 🟢 LOW | ArsariCore PR cron | Disabled by budget choice |
@@ -231,4 +232,4 @@ If you clone this repo fresh:
 - [ ] Verify QwenPaw active provider/model in `/app/working/workspaces/default/agent.json`
 - [ ] Verify vault exists at `/app/working/workspaces/default/obsidian-system/vault`
 - [ ] Rebuild or re-run local RAG ingest if needed
-- [ ] Configure OAuth-based rclone only if Drive sync is needed
+- [ ] Verify both rclone remotes: `gdrive-obsidian` for read and `gdrive-obsidian-oauth` for write if Drive sync is needed

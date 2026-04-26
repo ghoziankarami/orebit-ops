@@ -12,8 +12,9 @@ Last check: <!-- INSERT_TIMESTAMP -->
 
 ## Sync Direction
 - Local ↔ Google Drive (bidirectional copy-merge, no deletes)
-- Remote: `gdrive-obsidian:0. Inbox`
-- Local: `/workspace/obsidian-system/vault/0. Inbox`
+- Read remote: `gdrive-obsidian:0. Inbox`
+- Write remote: `gdrive-obsidian-oauth:0. Inbox`
+- Local: `/app/working/workspaces/default/obsidian-system/vault/0. Inbox`
 
 ## HARDENING
 All folders except `0. Inbox` are permanently excluded from sync:

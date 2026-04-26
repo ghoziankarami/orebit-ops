@@ -3,7 +3,7 @@
 ## Overview
 
 Automated inbox sync is limited to `0. Inbox` only.
-This remains a guarded workflow until OAuth-based rclone write access is finalized.
+This is now a guarded but working workflow using split remotes: service account for read and OAuth for write.
 
 ## Hardening rule
 
@@ -69,10 +69,21 @@ bash ops/scripts/sync/status-obsidian-inbox-autosync.sh
 bash ops/scripts/sync/watchdog-obsidian-inbox-autosync.sh
 ```
 
+## Remote roles
+
+- `gdrive-obsidian` = service-account read remote
+- `gdrive-obsidian-oauth` = OAuth write remote
+- the autosync daemon pulls from the read remote and pushes to the write remote
+
+## Scheduling model
+
+This runtime currently uses QwenPaw cron plus the local autosync daemon, not OS `crontab`.
+The active cron job is the watchdog that restarts the daemon if it dies.
+
 ## Current caution
 
-Do not assume push is safe until rclone write auth is explicitly verified.
-Read-side pull and structure verification are the currently trusted paths.
+Inbox-only remains the automation boundary.
+Do not broaden autosync beyond `0. Inbox` unless the operational docs are updated first.
 
 ## Files
 
