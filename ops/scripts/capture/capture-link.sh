@@ -44,10 +44,10 @@ echo "[capture-link] Context: ${CONTEXT:-none}"
 result=$(python3 "$PYTHON_SCRIPT" "$URL" --context "${CONTEXT:-}" 2>&1)
 echo "[capture-link] $result"
 
-# Push-only to Drive (avoid pulling Drive→local which could overwrite fresh index)
-if [[ -x "${SCRIPT_DIR}/../sync/push-obsidian-inbox-copy-only.sh" ]]; then
+# Optional push to Drive when the canonical rclone write path is trusted.
+if [[ -x "${SCRIPT_DIR}/../sync/sync-inbox-push.sh" ]]; then
     echo "[capture-link] Syncing to Google Drive..."
-    bash "${SCRIPT_DIR}/../sync/push-obsidian-inbox-copy-only.sh"
+    bash "${SCRIPT_DIR}/../sync/sync-inbox-push.sh" || true
 fi
 
 echo "[capture-link] Done."
