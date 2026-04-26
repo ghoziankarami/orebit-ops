@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REMOTE="gdrive-obsidian"
-LOCAL_VAULT="/workspace/obsidian-system/vault"
+LOCAL_VAULT="/app/working/workspaces/default/obsidian-system/vault"
 INBOX_DIR="0. Inbox"
 DAEMON_LOCK="/tmp/obsidian-inbox-autosync.lock"
 DAEMON_PID="/tmp/obsidian-inbox-autosync.pid"

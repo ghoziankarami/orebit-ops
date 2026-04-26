@@ -3,7 +3,7 @@
 # Usage: bash capture-link.sh "URL" [--context "notes"]
 set -euo pipefail
 
-VAULT_PATH="${VAULT_PATH:-/workspace/obsidian-system/vault}"
+VAULT_PATH="${VAULT_PATH:-/app/working/workspaces/default/obsidian-system/vault}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 PYTHON_SCRIPT="${SCRIPT_DIR}/url_ingest.py"

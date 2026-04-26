@@ -67,4 +67,4 @@ bash ops/scripts/sync/watchdog-obsidian-inbox-autosync.sh
 - **Daemon not running**: `bash ops/scripts/sync/start-obsidian-inbox-autosync.sh`
 - **Sync stuck**: `bash ops/scripts/sync/stop-obsidian-inbox-autosync.sh && bash ops/scripts/sync/start-obsidian-inbox-autosync.sh`
 - **rclone not found**: Ensure rclone is in PATH or use full path
-- **Permission denied**: Check vault path `/workspace/obsidian-system/vault`
+- **Permission denied**: Check vault path `/app/working/workspaces/default/obsidian-system/vault`

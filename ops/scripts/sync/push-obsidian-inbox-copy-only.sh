@@ -5,7 +5,7 @@
 set -euo pipefail
 
 REMOTE="gdrive-obsidian"
-LOCAL_VAULT="${VAULT_PATH:-/workspace/obsidian-system/vault}"
+LOCAL_VAULT="${VAULT_PATH:-/app/working/workspaces/default/obsidian-system/vault}"
 INBOX_DIR="0. Inbox"
 LOG_DIR="/app/working/workspaces/default/orebit-ops/docs/audits/sync"
 

@@ -5,7 +5,7 @@ Capture links (YouTube, GitHub, articles, generic) into Obsidian vault using PAR
 
 ## Capture Command
 ```bash
-cd /app/working/workspaces/default/orebit-rag-deploy
+cd /app/working/workspaces/default/orebit-ops
 bash ops/scripts/capture/capture-link.sh "URL" --context "optional context"
 ```
 

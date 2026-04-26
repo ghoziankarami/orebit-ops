@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
-VAULT = os.environ.get("VAULT_PATH", "/workspace/obsidian-system/vault")
+VAULT = os.environ.get("VAULT_PATH", "/app/working/workspaces/default/obsidian-system/vault")
 INDEX_DIR = Path(VAULT) / "0. Inbox"
 
 def get_type(url):

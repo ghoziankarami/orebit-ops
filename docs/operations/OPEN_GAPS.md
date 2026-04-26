@@ -51,7 +51,7 @@ Last updated: 2026-04-25
 ## ⏳ Blocked
 
 - **Full-vault bisync**: dry-run shows many planned deletes; need manual review
-- **Auto Memory Search**: embedding backend `20128`/`cx/gpt-5.5` does not support embeddings; config empty
+- **Auto Memory Search**: embedding backend not configured yet; 9router has `openai/text-embedding-3-large` etc. but QwenPaw not wired to 9router
 - **`/workspace/` mount**: lost in container reset; all files stored in `/app/working/workspaces/default/orebit-rag-deploy/` going forward
 
 ---
