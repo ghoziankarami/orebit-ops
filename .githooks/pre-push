@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+branch=$(git branch --show-current 2>/dev/null || echo "")
+remote_name=${1:-origin}
+remote_url=${2:-}
+
+if [ "$branch" != "main" ] && [ "${ALLOW_NON_MAIN_PUSH:-}" != "1" ]; then
+  echo "ERROR: refusing push from branch '$branch'." >&2
+  echo "This repo uses a main-first workflow." >&2
+  echo "If this push is intentional, rerun with ALLOW_NON_MAIN_PUSH=1" >&2
+  exit 1
+fi
+
+case "$remote_name" in
+  origin) ;;
+  *)
+    if [ "${ALLOW_NON_ORIGIN_PUSH:-}" != "1" ]; then
+      echo "ERROR: refusing push to remote '$remote_name'." >&2
+      echo "Default safe remote is 'origin'. Override with ALLOW_NON_ORIGIN_PUSH=1 if intentional." >&2
+      exit 1
+    fi
+    ;;
+esac
+
+exit 0
