@@ -1,132 +1,78 @@
 # Rclone Setup
 
-Use this runbook to make Google Drive usable for the Orebit workspace.
+Use this runbook to understand the current rclone and Google Drive position for Orebit.
 
-This repo expects two separate concepts:
+## Current canonical state
 
-1. a working `rclone` Google Drive remote for backup and restore
-2. an active mount at `/mnt/gdrive/AI_Knowledge` for paper-processing workflows
+The current system treats Google Drive as the intended cross-device source of truth for the Obsidian vault, but not yet as a fully trusted write path from this runtime.
 
-Do not treat a placeholder `rclone.conf` as a valid setup.
+What is true now:
+- `rclone` read access to the shared `Obsidian` folder works
+- the connected folder is the real existing Google Drive `Obsidian` vault
+- local vault work happens at `/app/working/workspaces/default/obsidian-system/vault`
+- service-account write is still blocked in practice
+- OAuth-based write finalization is still pending
 
-## Required remotes
+## Current remote expectation
 
-The current workspace expects these remote names:
-
-- `gdrive`
+The important operational remote is:
 - `gdrive-obsidian`
-- `gdrive-research`
 
-Recommended meaning:
+It should point at the real shared Google Drive `Obsidian` folder using the configured `root_folder_id`.
 
-- `gdrive` = primary Google Drive remote
-- `gdrive-obsidian` = alias to `gdrive:Obsidian`
-- `gdrive-research` = alias to `gdrive:AI_Knowledge`
+## Current success criteria
 
-## Current failure mode to recognize
+Read-path success means:
+- `rclone lsd gdrive-obsidian:` works
+- the real vault structure is visible
+- inbox or full-vault pull scripts can read from the remote
 
-If `rclone` returns `invalid_grant`, the stored OAuth token is stale or invalid.
-That remote is not usable until it is reconnected.
+Write-path success is not yet assumed.
+
+## Important caution
+
+Do not assume service-account write is safe just because read works.
+The service-account path previously failed with Google Drive quota/storage behavior.
 
 ## Check current status
 
 ```bash
-rclone config show
 rclone listremotes
-rclone about gdrive:
-rclone lsd gdrive:
-rclone lsd gdrive-research:
-mountpoint -q /mnt/gdrive/AI_Knowledge && echo mounted || echo not-mounted
-```
-
-## Reconnect the primary Google Drive remote
-
-If `gdrive` already exists but fails auth, reconnect it:
-
-```bash
-rclone config reconnect gdrive:
-```
-
-If the remote does not exist yet, create it:
-
-```bash
-rclone config
-```
-
-Recommended base remote:
-
-- name: `gdrive`
-- type: `drive`
-- scope: `drive`
-
-After reconnect or creation, verify:
-
-```bash
-rclone about gdrive:
-rclone lsd gdrive:
-```
-
-## Create or repair aliases
-
-Use aliases so scripts can keep stable names:
-
-```bash
-rclone config create gdrive-obsidian alias remote gdrive:Obsidian
-rclone config create gdrive-research alias remote gdrive:AI_Knowledge
-```
-
-Verify:
-
-```bash
 rclone lsd gdrive-obsidian:
-rclone lsd gdrive-research:
+rclone size gdrive-obsidian:
 ```
 
-## Activate the paper mount
+## Working local path
 
-Create the mountpoint if needed:
+Use this as the persistent local mirror path:
 
 ```bash
-mkdir -p /mnt/gdrive/AI_Knowledge
+/app/working/workspaces/default/obsidian-system/vault
 ```
 
-Mount the research folder:
+Do not use:
 
 ```bash
-rclone mount gdrive:AI_Knowledge /mnt/gdrive/AI_Knowledge --daemon
+/workspace/obsidian-system/vault
 ```
 
-Verify:
+## Canonical scripts
+
+Use the active scripts in:
 
 ```bash
-mountpoint -q /mnt/gdrive/AI_Knowledge && echo mount-ok
-ls -la /mnt/gdrive/AI_Knowledge | sed -n '1,40p'
+ops/scripts/sync/
 ```
 
-## Backup and restore usage
+Important scripts include:
+- `setup-rclone-service-account.sh`
+- `sync-vault-initial-pull.sh`
+- `sync-inbox-pull.sh`
+- `sync-inbox-push.sh`
 
-The backup helper uses the `gdrive` remote, not the mounted path:
+## Canonical interpretation
 
-```bash
-bash infra-template/sync-to-gdrive.sh --dry-run
-bash infra-template/sync-to-gdrive.sh
-bash infra-template/sync-to-gdrive.sh --restore
-```
-
-## Workflow mapping
-
-- `gdrive` is for backup and restore
-- `gdrive-research` points to the research paper source folder
-- `/mnt/gdrive/AI_Knowledge` is the live mounted paper source used by paper scripts
-- `gdrive-obsidian` is the optional alias for Obsidian folder operations
-
-## Success criteria
-
-Primary success in the current runtime is:
-
-- `rclone about gdrive:` works
-- `rclone lsd gdrive-research:` works
-- `bash research-data/install.sh` accepts the remote+cache path
-- `scripts_sync_drive_to_local.sh` and `scripts_sync_sample_papers.sh` can populate local working paths
-
-Optional mount success is only required on hosts that actually support FUSE.
+- Google Drive is the intended long-term source of truth across devices
+- this runtime currently trusts Drive read more than Drive write
+- local vault cleanup can proceed without assuming write-back is ready
+- inbox-first automation remains the safest default sync model

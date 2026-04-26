@@ -1,54 +1,55 @@
 # QwenPaw Workspace Bridge
 
 ## Purpose
-Bridge between QwenPaw container runtime and Orebit operational repo.
 
-## Storage Policy (POST-RESET)
-⚠️ **`/workspace/` is NOT reliable for permanent storage.**
-Container resets can detach `/workspace/` mount.
+Bridge the live QwenPaw runtime, the Orebit repo, and the Obsidian knowledge system.
 
-**Safe locations:**
-- **GitHub**: all files committed here (permanent)
-- **`/app/working/workspaces/default/`**: persistent with container
+## Storage policy
 
-## Repo Location
-```
-/app/working/workspaces/default/orebit-ops/
-```
-(Cloned from GitHub: `https://github.com/ghoziankarami/orebit-ops`)
-(Branch: `feat/bootstrap-secondbrain-sync`)
+`/workspace/` is not a safe canonical runtime root.
+Use persistent paths and GitHub.
 
-## Key Files in QwenPaw Workspace
-- `OREBIT_RUNTIME.md` — runtime bridge (in workspace root)
-- `agent.json` — agent config with system_prompt_files
+Safe locations:
+- GitHub for committed canonical files
+- `/app/working/workspaces/default/` for persistent runtime work
 
-## Ops Files in Repo
-```
-orebit-rag-deploy/
-├── ops/
-│   ├── scripts/
-│   │   ├── sync/          # Autosync daemon + scripts
-│   │   ├── capture/       # PARA link capture
-│   │   └── obsidian/      # Index rebuild
-│   └── runbooks/          # Runbook docs
-├── docs/
-│   └── operations/        # Operational docs
-└── .github/               # GitHub governance
+Avoid:
+- `/workspace/` for active canonical runtime state
+
+## Canonical repo location
+
+```text
+/app/working/workspaces/default/orebit-ops
 ```
 
-## Cron Jobs (QwenPaw)
-- **Autosync Watchdog**: every 5 min (SILENT — no chat messages)
-- All Orebit cron jobs run SILENT (write to files only, no chat output)
+## Canonical branch
 
-## Service Endpoints
-- RAG API: `http://127.0.0.1:3004`
+The intended canonical branch is `main`.
+Working branches may still exist for iteration, but the final readable operational state should land on `main`.
+
+## Important runtime files
+
+- workspace config: `/app/working/workspaces/default/agent.json`
+- repo status doc: `docs/operations/OPERATIONAL_STATUS.md`
+- start-here doc: `docs/START_HERE.md`
+- system SOP: `docs/workflows/OBSIDIAN_SYSTEM_SOP.md`
+
+## Key runtime endpoints
+
 - QwenPaw: `http://127.0.0.1:8088`
-- ninerouter: `http://127.0.0.1:20128`
-- Streamlit: `http://127.0.0.1:8503`
+- 9router: `http://127.0.0.1:20128/v1`
+- local embedding server: `http://127.0.0.1:3005/health`
 
-## Best Practices
-1. **Commit to GitHub immediately** after creating important files
-2. **Never rely on `/workspace/`** for permanent storage
-3. **Test sync scripts** before deploying
-4. **All automation SILENT** — no chat messages
-5. **Keep OREBIT_RUNTIME.md updated** in workspace
+## Current knowledge-system rule
+
+- QwenPaw is the exploration surface
+- Obsidian is the durable artifact surface
+- the repo stores the canonical documentation and selected mirrored notes
+
+## Best practices
+
+1. commit canonical docs and key mirrored notes to `main`
+2. do not depend on `/workspace/`
+3. treat `docs/START_HERE.md` as the entrypoint for humans
+4. treat `docs/operations/OPERATIONAL_STATUS.md` as runtime truth
+5. turn valuable chat outputs into typed vault notes instead of leaving them only in transcript history
