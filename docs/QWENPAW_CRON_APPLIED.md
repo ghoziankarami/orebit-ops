@@ -1,41 +1,44 @@
 # QwenPaw Cron Applied
 
-This file lists only cron jobs that have been verified from the live QwenPaw runtime and are relevant to this repository migration.
+> Last verified: 2026-04-26 — Source: `qwenpaw cron list --agent-id default`
 
-It is intentionally not a copy of the old `openclaw-workspace/docs/CRON_REGISTRY.md`.
+## All Cron Jobs (4 total)
 
-## Verification source
+### 1. ArsariCore PR Checker
+- **ID:** `0c608158-265f-430e-816f-0c3192a856e0`
+- **Schedule:** `0 */6 * * *` (every 6 hours)
+- **Status:** ❌ **Disabled** (budget)
+- **Session:** `telegram:187945281`
+- **Task:** Review open PRs, mark ready if safe, merge if possible
 
-Verified via:
+### 2. Orebit Autosync Watchdog
+- **ID:** `f54e6ef2-e289-4bca-89cf-782c4af36745`
+- **Schedule:** `*/5 * * * *` (every 5 min)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Check obsidian sync daemon, restart if dead, write status to file
 
-```bash
-qwenpaw cron list --agent-id default
-```
+### 3. Orebit Runtime Heartbeat
+- **ID:** `4ef3ddcf-7293-4bb4-9bf4-abf4b50c754d`
+- **Schedule:** `*/15 * * * *` (every 15 min)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Write runtime state to file
 
-## Verified active jobs
+### 4. Orebit Runtime Audit
+- **ID:** `8e998c92-...`
+- **Schedule:** `0 */6 * * *` (every 6 hours)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Audit all Orebit systems
 
-### ArsariCore PR Checker
+## Summary
 
-- status: enabled
-- schedule: `0 */6 * * *`
-- timezone: `Etc/UTC`
-- task type: `agent`
-- dispatch: Telegram final message to user session `telegram:187945281`
-- prompt:
-  - `Review dan cek semua PR open di ArsariCore-. Tandai sebagai ready jika aman, merge jika memungkinkan. Kirim laporan hasilnya kesini.`
+| Job | Silent? | Telegram? |
+|-----|---------|-----------|
+| ArsariCore PR Checker | ❌ | ✅ (but disabled) |
+| Autosync Watchdog | ✅ | ❌ |
+| Runtime Heartbeat | ✅ | ❌ |
+| Runtime Audit | ✅ | ❌ |
 
-## Interpretation
-
-This proves that the ArsariCore PR review loop is currently applied in QwenPaw itself, not only in legacy workspace notes.
-
-## What is not yet listed here
-
-The following items may exist elsewhere, but should not be documented here until verified from the live QwenPaw runtime:
-
-- old machine-level cron jobs from `openclaw-workspace/docs/CRON_REGISTRY.md`
-- dashboard-side schedules that are not represented in QwenPaw cron
-- planned jobs for `orebit-rag-deploy` that are not yet created in QwenPaw
-
-## Next migration step
-
-If a new repo-focused QwenPaw cron is created later for `orebit-rag-deploy`, add it here only after verifying it through the QwenPaw cron API/CLI.
+**User preference:** All cron jobs must be silent. Telegram output only on explicit request.
