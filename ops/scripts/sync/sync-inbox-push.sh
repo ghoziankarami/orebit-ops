@@ -6,7 +6,7 @@
 set -euo pipefail
 
 LOCAL_INBOX="/app/working/workspaces/default/obsidian-system/vault/0. Inbox"
-DRIVE_INBOX="gdrive-obsidian:/0. Inbox"
+DRIVE_INBOX="gdrive-obsidian-oauth:/0. Inbox"
 LOG_FILE="/tmp/rclone-sync.log"
 LOCK_FILE="/tmp/rclone-sync.lock"
 

@@ -15,10 +15,11 @@ What is true now:
 
 ## Current remote expectation
 
-The important operational remote is:
-- `gdrive-obsidian`
+The important operational remotes are:
+- `gdrive-obsidian` for service-account read access
+- `gdrive-obsidian-oauth` for OAuth-backed write access
 
-It should point at the real shared Google Drive `Obsidian` folder using the configured `root_folder_id`.
+Both should point at the real shared Google Drive `Obsidian` folder using the configured `root_folder_id`.
 
 ## Current success criteria
 
@@ -27,7 +28,10 @@ Read-path success means:
 - the real vault structure is visible
 - inbox or full-vault pull scripts can read from the remote
 
-Write-path success is not yet assumed.
+Write-path success means:
+- `rclone lsd gdrive-obsidian-oauth:` works
+- a small test write/delete succeeds on the OAuth remote
+- inbox push uses the OAuth remote, not the service-account remote
 
 ## Important caution
 
