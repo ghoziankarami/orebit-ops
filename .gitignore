@@ -31,6 +31,11 @@ rag-system/*.pyc
 # Vault content (large)
 obsidian-system/vault/**/*.md
 !obsidian-system/vault/README.md
+!obsidian-system/vault/README_SYSTEM.md
+!obsidian-system/vault/Home - Research and Operations.md
+!obsidian-system/vault/START HERE.md
+!obsidian-system/vault/3. Resources/Operating Systems/Obsidian System SOP.md
+!obsidian-system/vault/3. Resources/SOPs/SOP - Turning QwenPaw Sessions into Durable Notes.md
 !obsidian-system/vault/.obsidian/
 
 # Research data content (large)

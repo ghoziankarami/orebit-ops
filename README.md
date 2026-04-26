@@ -1,71 +1,97 @@
 # Orebit Canonical Workspace
 
-> **Start here:** `docs/operations/OPERATIONAL_STATUS.md`
-> Everything else is a detail doc. OPERATIONAL_STATUS is the source of truth.
+> Start here: `docs/START_HERE.md`
+> Then read `docs/operations/OPERATIONAL_STATUS.md` for runtime truth.
 
 ---
 
-## This Repo Lives At
+## Repo purpose
 
-```
-/app/working/workspaces/default/orebit-ops/
-```
-Cloned from: `https://github.com/ghoziankarami/orebit-ops`
-Branch: `feat/bootstrap-secondbrain-sync`
+This repo is the canonical operational base for:
+
+- QwenPaw runtime and provider configuration
+- local-first RAG with local embeddings
+- Obsidian PARA workflow and capture rules
+- optional Google Drive sync for the vault
+- product-digital operating workflows
 
 ---
 
-## Active Ops Structure
+## This repo lives at
 
-```
+- Local: `/app/working/workspaces/default/orebit-ops`
+- Branch: `feat/bootstrap-secondbrain-sync`
+- Remote: `https://github.com/ghoziankarami/orebit-ops`
+
+---
+
+## Active structure
+
+```text
 orebit-ops/
-├── ops/
-│   ├── scripts/
-│   │   ├── sync/           # Autosync daemon + scripts
-│   │   └── capture/        # PARA link capture (url_ingest.py)
-│   └── runbooks/
-│       ├── OBSIDIAN_INBOX_AUTOSYNC.md
-│       └── PARA_CAPTURE.md
 ├── docs/
-│   ├── operations/         # ← Start here
-│   │   ├── OPERATIONAL_STATUS.md   ← Canonical truth
+│   ├── operations/
+│   │   ├── OPERATIONAL_STATUS.md
 │   │   ├── OPEN_GAPS.md
-│   │   ├── QWENPAW_WORKSPACE_BRIDGE.md
-│   │   └── OBSIDIAN_INBOX_AUTOSYNC_STATUS.md
+│   │   └── QWENPAW_WORKSPACE_BRIDGE.md
 │   ├── workflows/
-│   │   └── SECOND_BRAIN_CAPTURE_WORKFLOW.md
+│   │   ├── SECOND_BRAIN_CAPTURE_WORKFLOW.md
+│   │   ├── PRODUCT_DIGITAL_BLUEPRINT.md
+│   │   ├── QWENPAW_RESEARCH_PLAYGROUND.md
+│   │   ├── OBSIDIAN_KNOWLEDGE_ARCHITECTURE.md
+│   │   └── LEGACY_RESEARCH_BRIDGE.md
 │   ├── setup/
 │   │   └── RCLONE_SETUP.md
-│   └── archived/           # Stale docs (do not use)
-└── .github/               # CI/CD governance
+│   └── archived/
+├── ops/
+│   ├── runbooks/
+│   └── scripts/
+├── obsidian-system/
+├── rag-system/
+└── .github/
 ```
 
 ---
 
-## Three Active Workflows
+## Current canonical architecture
 
-| Workflow | Status | Runbook |
-|----------|--------|---------|
-| PARA link capture | ✅ Scripts ready | `ops/runbooks/PARA_CAPTURE.md` |
-| Obsidian inbox autosync | ✅ Daemon ready, needs rclone OAuth | `ops/runbooks/OBSIDIAN_INBOX_AUTOSYNC.md` |
-| RAG (no Docker) | ❌ Needs rebuild | See OPERATIONAL_STATUS.md |
+### Runtime
+- QwenPaw is the main operator surface
+- `opencode_go/kimi-k2.6` is the active default model
+- 9router remains available for GPT-5 family chat models
+- `git` access to GitHub works in this runtime; `gh` is installed but not yet authenticated
+
+### Memory and RAG
+- local embedding server on port `3005`
+- local embedding model `all-MiniLM-L6-v2`
+- local ChromaDB persistence
+- no Docker required for the active RAG path
+
+### Obsidian
+- persistent vault path: `/app/working/workspaces/default/obsidian-system/vault`
+- Google Drive `Obsidian` is the intended source of truth across devices
+- automation should write to `0. Inbox/` first
+- QwenPaw chat outputs should be promoted into typed notes instead of left only in transcript history
 
 ---
 
-## Storage Rules
+## Read these first
 
-| Safe | Unsafe |
-|------|--------|
-| GitHub | `/workspace/` |
-| `/app/working/workspaces/default/` | |
-
-**Commit before restart. Clone to reset.**
+- `docs/operations/OPERATIONAL_STATUS.md`
+- `docs/workflows/OBSIDIAN_SYSTEM_SOP.md`
+- `docs/workflows/SECOND_BRAIN_CAPTURE_WORKFLOW.md`
+- `docs/workflows/PRODUCT_DIGITAL_BLUEPRINT.md`
+- `docs/workflows/QWENPAW_RESEARCH_PLAYGROUND.md`
+- `docs/workflows/OBSIDIAN_KNOWLEDGE_ARCHITECTURE.md`
+- `docs/workflows/OBSIDIAN_SYSTEM_BLUEPRINT.md`
+- `docs/workflows/OBSIDIAN_FOLDER_MAP.md`
+- `docs/workflows/OBSIDIAN_TEMPLATE_SYSTEM.md`
+- `docs/workflows/LEGACY_RESEARCH_BRIDGE.md`
+- `docs/setup/RCLONE_SETUP.md`
 
 ---
 
-## Quick Links
+## Important rule
 
-- [OPERATIONAL_STATUS.md](docs/operations/OPERATIONAL_STATUS.md) — live state
-- [OPEN_GAPS.md](docs/operations/OPEN_GAPS.md) — what needs doing
-- [PARA_CAPTURE.md](ops/runbooks/PARA_CAPTURE.md) — capture workflow
-- [OBSIDIAN_INBOX_AUTOSYNC.md](ops/runbooks/OBSIDIAN_INBOX_AUTOSYNC.md) — sync workflow
+Do not trust stale docs in `docs/archived/` for runtime decisions.
+Use `docs/operations/OPERATIONAL_STATUS.md` as the source of truth.

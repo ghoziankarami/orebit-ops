@@ -1,72 +1,68 @@
 # Orebit — Open Gaps & Todo
 
-## Status: IN PROGRESS
+## Status: ACTIVE
 
-Last updated: 2026-04-25
-
----
-
-## ✅ Completed
-
-### Autosync (Obsidian Inbox)
-- [x] Copy-merge bidirectional sync for `0. Inbox` only
-- [x] HARDENED: all other folders permanently blocked
-- [x] Daemon with start/stop/status scripts
-- [x] Watchdog auto-restart
-- [x] Audit logs per sync cycle
-- [x] Runbook created
-
-### PARA Capture
-- [x] Link capture routing (YouTube/GitHub/article/generic/task)
-- [x] YouTube metadata enrichment (yt-dlp)
-- [x] Push-only after capture (avoid overwrite)
-- [x] Index rebuild script
-- [x] Runbook created
-
-### GitHub Governance
-- [x] CODEOWNERS file
-- [x] PR template
-- [x] CI workflow (lint, test)
-- [x] Workflow files
-
-### QwenPaw Bridge
-- [x] OREBIT_RUNTIME.md in workspace
-- [x] QWENPAW_WORKSPACE_BRIDGE.md in repo
-- [x] system_prompt_files updated
+Last updated: 2026-04-26
 
 ---
 
-## 🔄 In Progress
+## Completed
 
-- [ ] Full-vault bisync review (dry-run showed many planned deletes)
-- [ ] GitHub multi-repo PR automation hardening
-- [ ] Daily briefing automation
-- [ ] Auto Memory Search embedding backend validation
-- [ ] Obsidian autopromote verification
-- [ ] QwenPaw fresh-session procedure audit
-- [ ] GitHub deploy automation full (secrets, branch protection)
+### Runtime and providers
+- [x] 9router restored and pruned to 8 reliable models
+- [x] opencode_go configured and pruned to 5 reliable models
+- [x] OpenRouter free models reviewed and pruned to 12 retained models
+- [x] Active QwenPaw model set to `opencode_go/kimi-k2.6`
 
----
+### RAG and memory
+- [x] Rebuilt RAG without Docker
+- [x] Installed local ChromaDB persistence
+- [x] Installed local embedding server on port `3005`
+- [x] Pointed QwenPaw embedding config to local embedding server
 
-## ⏳ Blocked
-
-- **Full-vault bisync**: dry-run shows many planned deletes; need manual review
-- **Auto Memory Search**: embedding backend not configured yet; 9router has `openai/text-embedding-3-large` etc. but QwenPaw not wired to 9router
-- **`/workspace/` mount**: lost in container reset; all files stored in `/app/working/workspaces/default/orebit-rag-deploy/` going forward
-
----
-
-## 📌 Storage Policy
-- **AMAN**: GitHub repo, `/app/working/workspaces/default/`
-- **TIDAK AMAN**: `/workspace/` (mount can detach)
-- **Commit all important files to GitHub immediately**
+### Obsidian and PARA
+- [x] Verified canonical PARA layout from runbooks and older docs
+- [x] Established working vault at `/app/working/workspaces/default/obsidian-system/vault`
+- [x] Confirmed Google Drive `Obsidian` folder is the intended source of truth
+- [x] Added inbox pull/push and initial pull sync scripts
 
 ---
 
-## 🔑 Key Paths
-- Repo: `/app/working/workspaces/default/orebit-ops/` (cloned from GitHub)
-- Vault: `/workspace/obsidian-system/vault`
-- Obsidian Inbox sync: `ops/scripts/sync/`
-- Capture: `ops/scripts/capture/`
-- Runbooks: `ops/runbooks/`
-- Ops docs: `docs/operations/`
+## In Progress
+
+- [ ] Complete one clean full-vault sync verification against Google Drive
+- [ ] Validate QwenPaw memory search end-to-end using the local embedding backend
+- [ ] Continue local vault curation for research, fleeting notes, and legacy knowledge promotion
+- [ ] Add concrete example notes that exercise the new QwenPaw research-playground templates
+- [ ] Update canonical docs and runbooks to reflect the new knowledge architecture and capture workflow
+
+---
+
+## Blocked / Deferred
+
+- [ ] rclone write access through service account is blocked by Google Drive quota rules
+- [ ] OAuth-based rclone write setup is deferred until user wants to resume it
+- [ ] Full bidirectional vault sync should not be enabled until write path is trusted
+
+---
+
+## Key Rules
+
+- Use `/app/working/workspaces/default/` as the only persistent workspace root.
+- Do not depend on `/workspace/` for anything important.
+- Treat `docs/operations/OPERATIONAL_STATUS.md` as canonical runtime truth.
+- Treat `0. Inbox/` as the only default automation write surface.
+- Keep embeddings local unless 9router embedding credentials are explicitly fixed.
+- Treat QwenPaw chat as an exploration surface and Obsidian notes as the durable artifact surface.
+- Promote valuable chat outputs into typed notes instead of keeping them only as transcript history.
+
+---
+
+## Key Paths
+
+- Repo: `/app/working/workspaces/default/orebit-ops`
+- Vault: `/app/working/workspaces/default/obsidian-system/vault`
+- Chroma store: `/app/working/workspaces/default/file_store/chroma`
+- Embedding server: `/app/working/workspaces/default/orebit-ops/rag-system/embedding_server.py`
+- RAG script: `/app/working/workspaces/default/orebit-ops/rag-system/rag_no_docker.py`
+- Sync scripts: `/app/working/workspaces/default/orebit-ops/ops/scripts/sync`
