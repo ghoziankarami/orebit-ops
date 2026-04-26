@@ -73,6 +73,8 @@ Important scripts include:
 - `sync-vault-initial-pull.sh`
 - `sync-inbox-pull.sh`
 - `sync-inbox-push.sh`
+- `autosync-obsidian-inbox-copy-merge.sh`
+- `backup-obsidian-sync-state.sh`
 
 ## Canonical interpretation
 

@@ -1,8 +1,8 @@
 # QwenPaw Cron Applied
 
-> Last verified: 2026-04-26 — Source: `qwenpaw cron list --agent-id default`
+> Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`
 
-## All Cron Jobs (4 total)
+## All Cron Jobs (5 total)
 
 ### 1. ArsariCore PR Checker
 - **ID:** `0c608158-265f-430e-816f-0c3192a856e0`
@@ -32,6 +32,12 @@
 - **Session:** `cron:orebit-silent` (silent — no Telegram)
 - **Task:** Audit all Orebit systems
 
+### 5. Orebit Obsidian Sync Backup
+- **Schedule:** `30 */6 * * *` (every 6 hours at minute 30)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Run `ops/scripts/backup/backup-obsidian-sync-state.sh` and write backup artifacts only
+
 ## Summary
 
 | Job | Silent? | Telegram? |
@@ -40,5 +46,6 @@
 | Autosync Watchdog | ✅ | ❌ |
 | Runtime Heartbeat | ✅ | ❌ |
 | Runtime Audit | ✅ | ❌ |
+| Obsidian Sync Backup | ✅ | ❌ |
 
 **User preference:** All cron jobs must be silent. Telegram output only on explicit request.
