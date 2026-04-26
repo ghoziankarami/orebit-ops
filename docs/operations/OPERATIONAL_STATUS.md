@@ -1,40 +1,64 @@
-# Orebit — Operational Status
+# Orebit Operational Status
 
-## ⚠️ CONTAINER RESET NOTE
-**`/workspace/` mount detached after container reset (2026-04-25).**
-Repo re-cloned to: `/app/working/workspaces/default/orebit-ops/`
-All scripts and configs are being rebuilt here.
+> Last updated: 2026-04-26
 
-## Services (running on host)
-| Service | Port | Status |
-|---------|------|--------|
-| RAG API | 3004 | ⚠️ need verification |
-| QwenPaw | 8088 | ⚠️ need verification |
-| ninerouter | 20128 | ⚠️ need verification |
-| Streamlit | 8503 | ⚠️ need verification |
+## Services
 
-## Autosync (Obsidian Inbox ↔ Google Drive)
-- Status: 🔴 Need to restart daemon
-- Script: `ops/scripts/sync/autosync-obsidian-inbox-copy-merge.sh`
-- Daemon: `ops/scripts/sync/run-obsidian-inbox-autosync-daemon.sh`
-- Run: `bash ops/scripts/sync/start-obsidian-inbox-autosync.sh`
+| Service | Port | Status | Endpoint |
+|---------|------|--------|----------|
+| QwenPaw | 8088 | ✅ Healthy | http://localhost:8088 |
+| RAG API | 3004 | ⚠️ Unknown (port not reachable from container) | http://10.0.1.154:3004 |
+| ninerouter | 20128 | ⚠️ Unknown (port not reachable from container) | http://10.0.1.154:20128 |
+| Streamlit | 8503 | ⚠️ Unknown (port not reachable from container) | http://10.0.1.154:8503 |
 
-## PARA Capture
-- Script: `ops/scripts/capture/capture-link.sh`
-- Status: ✅ Ready to use (rebuilt after reset)
+> Services RAG/ninerouter/Streamlit berjalan di host Orebit (10.0.1.154), tidak reachable dari dalam SumoDok container ini karena network namespace berbeda.
 
-## GitHub
-- Repo: `https://github.com/ghoziankarami/orebit-rag-deploy`
-- Branch: `feat/bootstrap-secondbrain-sync`
-- Last commit: `787a1c8` (docs+ops: verify remote-cache RAG and Obsidian workflow)
+## Orebit Repo
 
-## Google Drive
-- Remote: `gdrive-obsidian`
-- Vault path: `/workspace/obsidian-system/vault`
-- Only `0. Inbox` is synced (HARDENED)
+- **Repo**: https://github.com/ghoziankarami/orebit-ops
+- **Branch**: `feat/bootstrap-secondbrain-sync`
+- **Local path**: `/app/working/workspaces/default/orebit-ops/`
+- **Last audit**: 2026-04-26
 
-## ⚠️ PENDING ACTIONS
-1. Restart autosync daemon on host
-2. Verify all services are running on host
-3. Verify `gh` auth on host
-4. Commit all rebuilt files to GitHub
+## GitHub Automation
+
+### ArsariCore Repository
+- **Repo**: https://github.com/ghoziankarami/ArsariCore-
+- **Main branch**: `master`
+- **Cron job**: `ArsariCore PR Checker` (every 6 hours)
+- **Latest**: PR #47 merged — fix(health): graceful DatabaseHealthCheck + static HTML smoke gate fixes
+- **CI**: ✅ All green on master
+
+### ArsariCore- CI Fixes Applied
+PR #47 (`fix/geology-resource-tonnage-formula`) fixed:
+1. **HTML smoke gate tests** — missing space before "Reference", "All Types" → "All"
+2. **DatabaseHealthCheck** — graceful handling of missing relational provider (CI/test environments), null-safe logger, `InvalidOperationException` → `Unhealthy` (not skip)
+3. **Whitespace formatting** — removed trailing whitespace, consistent 12-space catch indent
+
+## Autosync Daemon
+
+- **PID**: 432343 (may have died; use `status-autosync.sh` to check)
+- **Scope**: `0. Inbox` ↔ `gdrive-obsidian:0. Inbox`
+- **Interval**: 300s
+- **Mode**: copy-merge, no deletes (safe side)
+- **Lock file**: `/tmp/obsidian-inbox-autosync.lock`
+- **Log**: `docs/audits/sync/obsidian-inbox-autosync-YYYYMMDD-HHMMSS.log`
+
+## QwenPaw Cron Jobs
+
+| Name | Schedule | Session | Status |
+|------|----------|---------|--------|
+| ArsariCore PR Checker | `0 */6 * * *` | telegram | ✅ Active |
+| Orebit Autosync Watchdog | `*/5 * * * *` | silent | ✅ Active |
+| Orebit Runtime Heartbeat | `*/15 * * * *` | silent | ✅ Active |
+| Orebit Runtime Audit | `0 */6 * * *` | silent | ✅ Active |
+
+## Critical Gaps
+
+- ❌ Docker unavailable in SumoDok container — cannot install Docker-based services
+- ❌ `/workspace/` is volatile — file apa pun di sana akan hilang saat container restart
+- ❌ Google Drive OAuth belum configured — rclone perlu browser untuk otorisasi
+- ❌ rclone Google Drive remote `gdrive-obsidian` belum tested dengan OAuth
+- ❌ Auto Memory Search embedding backend belum valid
+- ❌ 9router installed but not configured (need OpenRouter/API key)
+- ⚠️ Full-vault bisync perlu manual review dulu sebelum apply
