@@ -38,6 +38,12 @@ Each backup contains:
 
 The script keeps the latest 14 backup directories.
 
+## Related operational scripts
+
+- `ops/scripts/sync/push-vault-safe.sh` for guarded full-vault local-to-Drive copy/update
+- `ops/scripts/capture/capture-task-note.sh` for writing chat-derived task notes into `0. Inbox/Task Notes/`
+- `rag-system/pdf_to_paper_note.py` for PDF text ingest into local RAG plus a draft note in `0. Inbox/Papers/`
+
 ## Manual backup command
 
 ```bash

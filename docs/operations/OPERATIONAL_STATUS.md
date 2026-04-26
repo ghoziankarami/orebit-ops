@@ -29,7 +29,8 @@
 | OpenRouter (via QwenPaw) | 443 | ✅ Yes | ✅ Configured | 12 retained free models; some upstream rate-limited |
 | opencode_go | 443 | ✅ Yes | ✅ Tested | 5 retained models tested working |
 | Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings` |
-| Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + sentence-transformers, no Docker |
+| Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker |
+| PDF-to-RAG paper intake | — | ✅ Yes | ✅ Working | PDF text can be ingested and draft notes can be written to `0. Inbox/Papers/` |
 | Obsidian Vault | — | ✅ Yes | ✅ Present | `/app/working/workspaces/default/obsidian-system/vault` |
 | Google Drive read access | — | ✅ Yes | ✅ Healthy | Folder is visible through rclone service-account remote |
 | Google Drive inbox write access | — | ✅ Yes | ✅ Healthy | OAuth remote tested with small write/delete and used for inbox push |
