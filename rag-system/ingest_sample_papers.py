@@ -6,8 +6,8 @@ from pathlib import Path
 
 import chromadb
 
-DB_PATH = Path('/workspace/orebit-rag-deploy/rag-system/chroma')
-PAPERS_CACHE = Path('/workspace/research-data/papers-cache')
+DB_PATH = Path('/app/working/workspaces/default/file_store/chroma')
+PAPERS_CACHE = Path('/app/working/workspaces/default/papers-cache')
 COLLECTION = 'research_papers'
 
 
@@ -20,7 +20,7 @@ def build_doc(path: Path) -> tuple[str, dict[str, object], str]:
         f'Title: {title}. '
         f'Normalized title: {normalized}. '
         f'Source file: {name}. '
-        f'This is a synced research paper from AI_Knowledge used for Orebit RAG indexing. '
+        f'This is a cached research paper sample used for Orebit RAG indexing. '
         f'Keywords: orebit research paper pdf geology mining knowledge base.'
     )
     metadata = {
@@ -35,16 +35,24 @@ def build_doc(path: Path) -> tuple[str, dict[str, object], str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='Ingest cached paper samples into the repo-local research_papers collection.')
+    parser = argparse.ArgumentParser(
+        description='Ingest cached paper samples into the local research_papers collection.'
+    )
     parser.add_argument('--limit', type=int, default=50)
+    parser.add_argument(
+        '--cache-dir',
+        default=str(PAPERS_CACHE),
+        help='Directory containing cached PDF samples.',
+    )
     args = parser.parse_args()
 
+    cache_dir = Path(args.cache_dir)
     client = chromadb.PersistentClient(path=str(DB_PATH))
     collection = client.get_or_create_collection(name=COLLECTION)
 
-    pdfs = sorted(PAPERS_CACHE.glob('*.pdf'))
+    pdfs = sorted(cache_dir.glob('*.pdf'))
     if not pdfs:
-        print('NO_PDFS')
+        print(f'NO_PDFS in {cache_dir}')
         return 1
 
     selected = pdfs[: args.limit]
@@ -71,7 +79,15 @@ def main() -> int:
     if add_ids:
         collection.add(ids=add_ids, documents=add_docs, metadatas=add_metas)
 
-    print({'collection': COLLECTION, 'selected': len(selected), 'total_after': collection.count(), 'added': len(add_ids)})
+    print(
+        {
+            'collection': COLLECTION,
+            'selected': len(selected),
+            'total_after': collection.count(),
+            'added': len(add_ids),
+            'cache_dir': str(cache_dir),
+        }
+    )
     return 0
 
 
