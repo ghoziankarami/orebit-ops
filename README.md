@@ -12,7 +12,7 @@ This repo is the canonical operational base for:
 - QwenPaw runtime and provider configuration
 - local-first RAG with local embeddings
 - Obsidian PARA workflow and capture rules
-- optional Google Drive sync for the vault
+- Google Drive sync for the vault orchestrated by QwenPaw-managed scripts and cron jobs
 - product-digital operating workflows
 
 ---
@@ -20,7 +20,7 @@ This repo is the canonical operational base for:
 ## This repo lives at
 
 - Local: `/app/working/workspaces/default/orebit-ops`
-- Branch: `feat/bootstrap-secondbrain-sync`
+- Branch: `main`
 - Remote: `https://github.com/ghoziankarami/orebit-ops`
 
 ---
@@ -59,7 +59,7 @@ orebit-ops/
 - QwenPaw is the main operator surface
 - `opencode_go/kimi-k2.6` is the active default model
 - 9router remains available for GPT-5 family chat models
-- `git` access to GitHub works in this runtime; `gh` is installed but not yet authenticated
+- `git` access to GitHub works in this runtime; `gh` is installed and authenticated
 
 ### Memory and RAG
 - local embedding server on port `3005`

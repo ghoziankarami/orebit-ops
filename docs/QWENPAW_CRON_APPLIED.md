@@ -2,7 +2,7 @@
 
 > Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`
 
-## All Cron Jobs (5 total)
+## All Cron Jobs (7 total)
 
 ### 1. ArsariCore PR Checker
 - **ID:** `0c608158-265f-430e-816f-0c3192a856e0`
@@ -33,10 +33,25 @@
 - **Task:** Audit all Orebit systems
 
 ### 5. Orebit Obsidian Sync Backup
+- **ID:** `8c0c034c-9437-45f2-b075-ce17066f9d6a`
 - **Schedule:** `30 */6 * * *` (every 6 hours at minute 30)
 - **Status:** ✅ Active
 - **Session:** `cron:orebit-silent` (silent — no Telegram)
 - **Task:** Run `ops/scripts/backup/backup-obsidian-sync-state.sh` and write backup artifacts only
+
+### 6. Orebit Vault Safe Push
+- **ID:** `0b237f7e-3a90-42d3-a3c6-0ab1b0875e54`
+- **Schedule:** `15 */6 * * *` (every 6 hours at minute 15)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Run `ops/scripts/sync/push-vault-safe.sh` to push local vault changes to Drive
+
+### 7. Orebit PDF Paper Intake
+- **ID:** `c7d39d39-4747-4f7a-a44b-82d3a127e31a`
+- **Schedule:** `45 */6 * * *` (every 6 hours at minute 45)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` (silent — no Telegram)
+- **Task:** Ingest vault PDFs into local RAG, write draft notes to `0. Inbox/Papers/`, then push vault changes to Drive
 
 ## Summary
 
@@ -47,5 +62,7 @@
 | Runtime Heartbeat | ✅ | ❌ |
 | Runtime Audit | ✅ | ❌ |
 | Obsidian Sync Backup | ✅ | ❌ |
+| Vault Safe Push | ✅ | ❌ |
+| PDF Paper Intake | ✅ | ❌ |
 
 **User preference:** All cron jobs must be silent. Telegram output only on explicit request.

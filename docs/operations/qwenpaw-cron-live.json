@@ -1,0 +1,312 @@
+[
+  {
+    "id": "0c608158-265f-430e-816f-0c3192a856e0",
+    "name": "ArsariCore PR Checker",
+    "enabled": false,
+    "schedule": {
+      "type": "cron",
+      "cron": "0 */6 * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "Review dan cek semua PR open di ArsariCore-. Tandai sebagai ready jika aman, merge jika memungkinkan. Kirim laporan hasilnya kesini.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "telegram:187945281",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "telegram",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "telegram:187945281"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 120,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "f54e6ef2-e289-4bca-89cf-782c4af36745",
+    "name": "Orebit Autosync Watchdog",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "*/5 * * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "role": "user",
+              "text": "SILENT: Write to file ONLY. No chat messages.\n\n1. Run: bash /app/working/workspaces/default/orebit-ops/ops/scripts/sync/status-obsidian-inbox-autosync.sh\n2. If NOT RUNNING: bash /app/working/workspaces/default/orebit-ops/ops/scripts/sync/start-obsidian-inbox-autosync.sh\n3. Write results to: /app/working/workspaces/default/orebit-ops/docs/operations/OBSIDIAN_INBOX_AUTOSYNC_STATUS.md\n\nUpdate only the Status section of that file. End silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 120,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "4ef3ddcf-7293-4bb4-9bf4-abf4b50c754d",
+    "name": "Orebit Runtime Heartbeat",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "*/15 * * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "role": "user",
+              "text": "SILENT: Write to file ONLY. No chat messages.\n\nRun all checks, append to /tmp/orebit-heartbeat.log:\necho \"=== $(date -Iseconds) ===\" >> /tmp/orebit-heartbeat.log\necho \"QwenPaw: $(curl -s --max-time 3 http://127.0.0.1:8088/ | head -c 50)\" >> /tmp/orebit-heartbeat.log\n/app/working/workspaces/default/gh pr list --repo ghoziankarami/ArsariCore- --state open 2>/dev/null >> /tmp/orebit-pr.log || echo \"gh error\" >> /tmp/orebit-pr.log\necho \"OK\" >> /tmp/orebit-heartbeat.log\nEnd silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 120,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "8c0c034c-9437-45f2-b075-ce17066f9d6a",
+    "name": "Orebit Obsidian Sync Backup",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "30 */6 * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "SILENT: Write to file ONLY. No chat messages. Run: bash /app/working/workspaces/default/orebit-ops/ops/scripts/backup/backup-obsidian-sync-state.sh . End silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 300,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "090dc9b4-6108-41c5-9738-34fcee51bf99",
+    "name": "Orebit Runtime Audit",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "0 */6 * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "SILENT: Write to file ONLY. No chat messages. Write a runtime audit to /tmp/orebit-audit.log with checks for QwenPaw, rclone remotes, autosync status, and backup latest symlink. Do not commit or push anything. End silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 300,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "0b237f7e-3a90-42d3-a3c6-0ab1b0875e54",
+    "name": "Orebit Vault Safe Push",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "15 */6 * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "SILENT: Write to file ONLY. No chat messages. Run: bash /app/working/workspaces/default/orebit-ops/ops/scripts/sync/push-vault-safe.sh . End silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 1800,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  },
+  {
+    "id": "c7d39d39-4747-4f7a-a44b-82d3a127e31a",
+    "name": "Orebit PDF Paper Intake",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "45 */6 * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "SILENT: Write to file ONLY. No chat messages. Run: bash /app/working/workspaces/default/orebit-ops/rag-system/ingest_all_pdfs_to_papers.sh && bash /app/working/workspaces/default/orebit-ops/ops/scripts/sync/push-vault-safe.sh . End silently.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "none",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 3600,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
+  }
+]

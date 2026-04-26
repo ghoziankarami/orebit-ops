@@ -66,7 +66,7 @@
 
 ---
 
-## QwenPaw Cron Jobs (5 configured)
+## QwenPaw Cron Jobs (7 configured)
 
 All silent — write to files only, no Telegram messages.
 
@@ -75,8 +75,10 @@ All silent — write to files only, no Telegram messages.
 | ArsariCore PR Checker | `0c608158-...` | `0 */6 * * *` | ❌ Disabled (budget) | telegram |
 | Orebit Autosync Watchdog | `f54e6ef2-...` | `*/5 * * * *` | ✅ Active | none |
 | Orebit Runtime Heartbeat | `4ef3ddcf-...` | `*/15 * * * *` | ✅ Active | none |
-| Orebit Runtime Audit | `8e998c92-...` | `0 */6 * * *` | ✅ Active | none |
-| Orebit Obsidian Sync Backup | pending doc refresh | `30 */6 * * *` | ✅ Active | none |
+| Orebit Runtime Audit | `090dc9b4-...` | `0 */6 * * *` | ✅ Active | none |
+| Orebit Vault Safe Push | `0b237f7e-...` | `15 */6 * * *` | ✅ Active | none |
+| Orebit Obsidian Sync Backup | `8c0c034c-...` | `30 */6 * * *` | ✅ Active | none |
+| Orebit PDF Paper Intake | `c7d39d39-...` | `45 */6 * * *` | ✅ Active | none |
 
 > The autosync watchdog cron is active and the inbox push path now uses the OAuth write remote.
 
