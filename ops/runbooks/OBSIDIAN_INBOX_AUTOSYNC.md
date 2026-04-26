@@ -1,70 +1,83 @@
 # Obsidian Inbox Autosync — Runbook
 
 ## Overview
-Automated bidirectional sync between local Obsidian vault `0. Inbox` and Google Drive `gdrive-obsidian:0. Inbox`. Uses copy-merge strategy (no deletes).
 
-## HARDENING RULE
-**ONLY `0. Inbox` is synced. All other folders are permanently blocked:**
-- `1. Projects` — BLOCKED
-- `2. Areas` — BLOCKED
-- `3. Resources` — BLOCKED
-- `4. Archive` / `4. Archives` — BLOCKED
-- `Attachments` — BLOCKED
-- `Templates` — BLOCKED
-- `.obsidian` — BLOCKED
+Automated inbox sync is limited to `0. Inbox` only.
+This remains a guarded workflow until OAuth-based rclone write access is finalized.
 
-This is enforced at the rclone level (--exclude flags).
+## Hardening rule
 
-## Architecture
-```
-autosync-daemon (runs every 300s)
-  └── autosync-obsidian-inbox-copy-merge.sh
-        ├── rclone copy gdrive-obsidian:0. Inbox → local 0. Inbox
-        └── rclone copy local 0. Inbox → gdrive-obsidian:0. Inbox
-```
+Only `0. Inbox` is sync-eligible by default.
+All other folders are treated as manual-only.
+
+Blocked by policy:
+
+- `1. Projects`
+- `2. Areas`
+- `3. Resources`
+- `4. Archive`
+- `4. Archives`
+- `Attachments`
+- `Templates`
+- `.obsidian`
+
+## Canonical scripts
+
+- Pull from Drive: `ops/scripts/sync/sync-inbox-pull.sh`
+- Push to Drive: `ops/scripts/sync/sync-inbox-push.sh`
+- Full initial pull: `ops/scripts/sync/sync-vault-initial-pull.sh`
+- Autosync daemon: `ops/scripts/sync/autosync-obsidian-inbox-copy-merge.sh`
 
 ## Commands
 
-### Start daemon
+### Pull inbox manually
+
 ```bash
-cd /app/working/workspaces/default/orebit-rag-deploy
+cd /app/working/workspaces/default/orebit-ops
+bash ops/scripts/sync/sync-inbox-pull.sh
+```
+
+### Push inbox manually
+
+```bash
+cd /app/working/workspaces/default/orebit-ops
+bash ops/scripts/sync/sync-inbox-push.sh
+```
+
+### Start daemon
+
+```bash
+cd /app/working/workspaces/default/orebit-ops
 bash ops/scripts/sync/start-obsidian-inbox-autosync.sh
 ```
 
 ### Stop daemon
+
 ```bash
 bash ops/scripts/sync/stop-obsidian-inbox-autosync.sh
 ```
 
 ### Check status
+
 ```bash
 bash ops/scripts/sync/status-obsidian-inbox-autosync.sh
 ```
 
-### Run once manually (no daemon)
-```bash
-bash ops/scripts/sync/autosync-obsidian-inbox-copy-merge.sh
-```
+### Run watchdog
 
-### Run watchdog (auto-restart if dead)
 ```bash
 bash ops/scripts/sync/watchdog-obsidian-inbox-autosync.sh
 ```
 
+## Current caution
+
+Do not assume push is safe until rclone write auth is explicitly verified.
+Read-side pull and structure verification are the currently trusted paths.
+
 ## Files
+
 - Daemon lock: `/tmp/obsidian-inbox-autosync.lock`
 - Daemon PID: `/tmp/obsidian-inbox-autosync.pid`
 - Status file: `/tmp/obsidian-inbox-autosync.status`
 - Watchdog log: `/tmp/obsidian-inbox-autosync-watchdog.status`
 - Audit logs: `docs/audits/sync/obsidian-inbox-autosync-*.log`
-
-## Cron watchdog (recommended)
-```bash
-*/5 * * * * cd /app/working/workspaces/default/orebit-rag-deploy && bash ops/scripts/sync/watchdog-obsidian-inbox-autosync.sh
-```
-
-## Troubleshooting
-- **Daemon not running**: `bash ops/scripts/sync/start-obsidian-inbox-autosync.sh`
-- **Sync stuck**: `bash ops/scripts/sync/stop-obsidian-inbox-autosync.sh && bash ops/scripts/sync/start-obsidian-inbox-autosync.sh`
-- **rclone not found**: Ensure rclone is in PATH or use full path
-- **Permission denied**: Check vault path `/app/working/workspaces/default/obsidian-system/vault`

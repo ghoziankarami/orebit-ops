@@ -5,7 +5,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
 
 BRANCH="${1:-}"
-MESSAGE="${2:-chore: sync orebit deploy repo}"
+MESSAGE="${2:-chore: sync orebit ops repo}"
 
 current_branch=$(git branch --show-current)
 default_branch=$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}')
@@ -25,13 +25,7 @@ if [ "$BRANCH" = "$default_branch" ]; then
   exit 1
 fi
 
-git add README.md DEPLOYMENT.md BOOTSTRAP.md AGENTS.md \
-  infra-template/install.sh \
-  obsidian-system/install.sh \
-  research-data/install.sh research-data/README.md \
-  rag-system/install.sh rag-system/docker-compose.yml rag-system/README.md rag-system/chroma_integration.py \
-  scripts_preflight_validate.py scripts_postflight_verify.py \
-  scripts_git_safe_sync.sh .gitignore || true
+git add README.md AGENTS.md docs ops obsidian-system rag-system scripts_git_safe_sync.sh .gitignore || true
 
 if git diff --cached --quiet; then
   echo "No tracked repo changes staged."
