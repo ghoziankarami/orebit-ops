@@ -11,6 +11,7 @@ It is a mixed transitional surface that contains:
 - active canonical intake lanes
 - older compatibility lanes still carrying useful history
 - a small number of artifacts and backups that should not keep growing
+- one small processed-video compatibility lane (`0. Inbox/YouTube/`) that should remain readable but should not grow
 
 This mixed state is acceptable for now.
 The goal is not instant minimalism; the goal is predictable forward behavior.
@@ -100,3 +101,4 @@ The inbox is successful when:
 - old content remains findable
 - automation remains safe
 - cleanup happens gradually without destroying useful history
+- compatibility lanes are visibly frozen rather than silently continuing to grow

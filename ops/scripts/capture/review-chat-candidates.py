@@ -47,6 +47,15 @@ SKIP_PHRASES = (
     "i'm checking",
     "i'm applying",
     "i found",
+    "memory pre-compression flush cycle",
+    "current session is about to enter the automatic compression phase",
+    "immediately store persistent memory and reflections",
+    "latest ci run:",
+    "system.invalidoperationexception",
+    "database health check failed",
+    "now i understand both issues clearly",
+    "now i have a complete picture",
+    "the two failures are",
 )
 
 META_PROGRESS_PHRASES = (
@@ -69,6 +78,19 @@ META_PROGRESS_PHRASES = (
     "i stopped because the repo is no longer clean",
     "i see the issue now",
     "maaf, saya harus jujur",
+    "saya cek dulu",
+    "saya temukan",
+    "saya rapikan",
+    "saya dorong",
+    "saya hapus",
+    "saya lanjut audit",
+    "bagus - saya sudah cek",
+    "bagus — saya sudah cek",
+    "iya, menurut saya",
+    "iya, ketemunya di sini",
+    "i'm verifying",
+    "i'm updating",
+    "i'm pushing",
 )
 
 REUSE_SIGNAL_PHRASES = (
@@ -83,10 +105,10 @@ REUSE_SIGNAL_PHRASES = (
     "promotion rule",
     "capture rule",
     "why this was staged",
-    "final state",
-    "audit result",
-    "hasil audit",
-    "the two failures are",
+    "claim-to-evidence",
+    "promotion target",
+    "operating model",
+    "canonical lane",
 )
 
 NOISE_TITLE_PREFIXES = (
@@ -100,7 +122,16 @@ NOISE_TITLE_PREFIXES = (
     "ok,",
     "siap,",
     "at ",
+    "now i understand",
+    "now i have",
+    "the two failures are",
+    "| ",
+    "1. ",
+    "2. ",
     "saya sudah kerjakan",
+    "iya,",
+    "bagus",
+    "i see the issue",
 )
 
 NOISE_TITLE_CONTAINS = (
@@ -113,6 +144,13 @@ NOISE_TITLE_CONTAINS = (
     "chat candidate",
     "status github tooling",
     "berikut final state",
+    "database health check failed",
+    "api key not found",
+    "final model inventory",
+    "vault structure sudah",
+    "fundamental failure",
+    "hasil audit 9router",
+    "branch lama dipakai terlalu lama",
 )
 
 NOISE_BODY_PHRASES = (
@@ -124,6 +162,11 @@ NOISE_BODY_PHRASES = (
     "hal yang sengaja tidak saya sentuh",
     "let me give a clear summary",
     "the user wants me to stop and summarize",
+    "memory pre-compression flush cycle",
+    "latest ci run:",
+    "system.invalidoperationexception",
+    "bagus — saya sudah cek live state anda",
+    "iya, ketemunya di sini masalahnya",
 )
 
 
@@ -205,6 +248,10 @@ def infer_title(text: str, candidate_type: str) -> str:
             continue
         if any(fragment in lowered for fragment in NOISE_TITLE_CONTAINS):
             continue
+        if line.count("|") >= 2:
+            continue
+        if re.fullmatch(r"`[^`]+`", line):
+            continue
         if 18 <= len(line) <= 100:
             return line.rstrip(":.")
     return f"Chat candidate - {candidate_type}"
@@ -220,6 +267,8 @@ def is_meta_progress_reply(text: str) -> bool:
         return True
     if any("summary" in line or "ringkas" in line for line in first_lines):
         return True
+    if any(line.count("|") >= 2 for line in first_lines):
+        return True
     if len(text) < 500 and any(line.startswith(("i see", "maaf", "sorry", "okay", "oke", "sip")) for line in first_lines):
         return True
 
@@ -232,7 +281,20 @@ def has_reuse_signal(text: str) -> bool:
         return True
     if "## " in text or "```" in text:
         return True
-    if re.search(r"\b(1\.|2\.|3\.|- )", text):
+    if re.search(r"\b(1\.|2\.|3\.|- )", text) and any(
+        marker in lowered
+        for marker in (
+            "rule",
+            "workflow",
+            "sop",
+            "decision",
+            "recommend",
+            "should",
+            "because",
+            "use ",
+            "keep ",
+        )
+    ):
         return True
     return False
 
@@ -241,7 +303,24 @@ def looks_like_stacktrace_fragment(text: str) -> bool:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines:
         return False
-    if len(text) < 800 and any(line.startswith("at ") for line in lines[:5]):
+    if any(line.startswith("at ") for line in lines[:8]):
+        return True
+    if any("exception" in line.lower() for line in lines[:8]) and any(
+        marker in text for marker in ("Traceback", "System.", "Microsoft.")
+    ):
+        return True
+    return False
+
+
+def looks_like_tool_or_system_dump(text: str) -> bool:
+    lowered = text.lower()
+    if '"role": "system"' in lowered or '"type": "tool_result"' in lowered:
+        return True
+    if "[tool_result]" in lowered or "[tool_use]" in lowered:
+        return True
+    if "execute_shell_command output" in lowered or "command failed with exit code" in lowered:
+        return True
+    if lowered.count("|") >= 6 and not has_reuse_signal(text):
         return True
     return False
 
@@ -255,6 +334,8 @@ def score_text(text: str) -> int:
     if is_meta_progress_reply(text):
         return 0
     if looks_like_stacktrace_fragment(text):
+        return 0
+    if looks_like_tool_or_system_dump(text):
         return 0
 
     score = 0
