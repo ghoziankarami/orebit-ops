@@ -13,6 +13,11 @@ This folder contains the active local RAG runtime pieces used by `orebit-ops`.
 The canonical active path is local-first and no-Docker.
 Do not treat the old Docker dashboard/API path as the main runtime unless it is deliberately revived.
 
+The canonical vault index is intentionally curated for operational second-brain retrieval:
+- include the active PARA/workflow knowledge surfaces
+- exclude archive/template/daily-note noise
+- prioritize inbox, SOP, and operating-system notes for workflow-style queries
+
 ## Canonical paths
 
 - Vault: `/app/working/workspaces/default/obsidian-system/vault`

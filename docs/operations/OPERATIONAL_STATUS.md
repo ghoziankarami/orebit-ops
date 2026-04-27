@@ -30,7 +30,7 @@
 | opencode_go | 443 | ✅ Yes | ✅ Tested | 5 retained models tested working |
 | Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings` |
 | QwenPaw memory search | — | ✅ Yes | ✅ Working | Remelight backend validated end-to-end against local embeddings |
-| Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker |
+| Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker; canonical vault indexing now excludes archive/template/daily-note noise and better prioritizes inbox/SOP/workflow retrieval |
 | PDF-to-RAG paper intake | — | ✅ Yes | ✅ Working | PDF text can be ingested and draft notes can be written to `0. Inbox/Papers/` |
 | RAG API wrapper data provider | — | ✅ Yes | ✅ Working | `rag_public_data.py` now reads the canonical local Chroma corpus and live paper summaries; broader cleanup of old assumptions is still desirable |
 | Obsidian Vault | — | ✅ Yes | ✅ Present | `/app/working/workspaces/default/obsidian-system/vault` |
@@ -163,6 +163,7 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 - Local container vault is the working mirror used for indexing and automation.
 - RAG indexing is local-only and does not require Docker.
 - Embeddings are generated locally with `all-MiniLM-L6-v2`.
+- The canonical vault index intentionally excludes archive/template/daily-note noise and now favors operational notes in `0. Inbox/`, `3. Resources/Operating Systems/`, and `3. Resources/SOPs/` for workflow-style retrieval.
 - QwenPaw memory search is validated end-to-end through the Remelight backend using the local embedding service on `3005`.
 - QwenPaw chat should be treated as an exploration surface; durable outputs should be promoted into typed vault notes.
 - Low-confidence transcript review is now staged into `0. Inbox/Automation Inbox/` via `ops/scripts/capture/review-chat-candidates.py`, with scheduled refresh through QwenPaw cron.
@@ -210,7 +211,7 @@ Important current lanes include:
 
 | Priority | Gap | Blocker |
 |----------|-----|---------|
-| 🟡 MED | Clean full vault sync verification | Need one non-overlapping final sync/check |
+| 🟡 MED | `rag.orebit.id` reproducible deploy path | Frontend baseline exists; wrapper contract is working, but production host/process-manager path still needs finalization |
 | 🟡 MED | `rag.orebit.id` reproducible deploy path | Frontend baseline exists; wrapper contract is working, but production host/process-manager path still needs finalization |
 | 🟡 MED | Example typed captures for geology/exploration/offshore/SOP/image requests | Workflow exists, examples still need to be populated |
 | 🟡 LOW | Inbox lane consolidation | `0. Inbox/` still contains canonical and legacy compatibility lanes side-by-side |
