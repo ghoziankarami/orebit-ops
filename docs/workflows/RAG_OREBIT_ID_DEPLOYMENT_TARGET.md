@@ -84,3 +84,4 @@ Do not replace the old UI during redeploy unless there is an explicit product de
 ## Next step
 
 Use `docs/runbooks/RAG_OREBIT_ID_DEPLOY.md` as the operational runbook for finishing this deploy path.
+Use `rag-system/api-wrapper/preflight.sh` as the repeatable backend preflight before calling a deploy healthy.

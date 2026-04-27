@@ -433,25 +433,52 @@ def score_text(text: str) -> int:
     if looks_like_tool_or_system_dump(text):
         return 0
 
+    reusable_markers = sum(
+        1
+        for keyword in (
+            "recommend",
+            "should",
+            "deploy",
+            "capture",
+            "research",
+            "workflow",
+            "sop",
+            "root cause",
+            "review",
+            "procedure",
+            "decision",
+            "criteria",
+            "guardrail",
+            "prevention",
+            "operating model",
+            "decision rule",
+        )
+        if keyword in lowered
+    )
+    has_structure = "##" in text or "```" in text or "|" in text or bool(re.search(r"\b(1\.|2\.|3\.|- )", text))
+    reuse_signal = has_reuse_signal(text)
+
+    if not reuse_signal and reusable_markers < 2:
+        return 0
+    if len(text) < 900 and not reuse_signal:
+        return 0
+    if reusable_markers == 0 and not reuse_signal:
+        return 0
+
     score = 0
     if len(text) >= 900:
         score += 2
     if len(text) >= 1500:
         score += 1
-    if "##" in text or "```" in text or "|" in text:
+    if has_structure:
         score += 2
-    if re.search(r"\b(1\.|2\.|3\.|- )", text):
-        score += 1
     if any(keyword in lowered for keyword in KEYWORD_TO_TYPE):
         score += 2
-    if any(keyword in lowered for keyword in ("recommend", "should", "deploy", "capture", "research", "workflow", "sop", "root cause", "review", "procedure", "decision", "criteria")):
+    score += min(reusable_markers, 3)
+    if any(marker in lowered for marker in ("root cause analysis", "review rules", "decision rule", "promotion rule", "guardrail")):
         score += 2
-    if any(marker in lowered for marker in ("what i changed", "what i added", "yang saya pasang", "root cause analysis", "review rules")):
+    if reuse_signal:
         score += 2
-    if has_reuse_signal(text):
-        score += 2
-    if len(text) < 700 and not has_reuse_signal(text):
-        return 0
     return score
 
 

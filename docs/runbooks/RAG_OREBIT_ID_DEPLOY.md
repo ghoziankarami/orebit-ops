@@ -81,6 +81,8 @@ cd /app/working/workspaces/default/orebit-ops/rag-system/api-wrapper
 npm install
 ```
 
+If `node index.js` fails with `Cannot find module 'dotenv'` or similar, dependencies were not installed in the current runtime yet.
+
 ### 3. Start the backend wrapper locally
 
 ```bash
@@ -148,6 +150,7 @@ Do not call the deploy green until all checks below pass.
 After deploy:
 
 ### 0. Backend preflight
+- run `bash rag-system/api-wrapper/preflight.sh`
 - verify local embedding health: `curl http://127.0.0.1:3005/health`
 - verify wrapper health: `curl http://127.0.0.1:3004/api/rag/health`
 - verify wrapper stats: `curl http://127.0.0.1:3004/api/rag/stats`
