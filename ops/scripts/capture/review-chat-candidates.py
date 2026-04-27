@@ -350,22 +350,27 @@ def has_reuse_signal(text: str) -> bool:
     lowered = text.lower()
     if any(phrase in lowered for phrase in REUSE_SIGNAL_PHRASES):
         return True
-    if "## " in text or "```" in text:
+
+    durable_markers = (
+        "rule",
+        "workflow",
+        "sop",
+        "decision",
+        "recommend",
+        "should",
+        "because",
+        "guardrail",
+        "prevention",
+        "operating model",
+        "promotion rule",
+        "review rule",
+        "capture rule",
+    )
+    marker_hits = sum(1 for marker in durable_markers if marker in lowered)
+
+    if marker_hits >= 2 and ("## " in text or "```" in text):
         return True
-    if re.search(r"\b(1\.|2\.|3\.|- )", text) and any(
-        marker in lowered
-        for marker in (
-            "rule",
-            "workflow",
-            "sop",
-            "decision",
-            "recommend",
-            "should",
-            "because",
-            "use ",
-            "keep ",
-        )
-    ):
+    if re.search(r"\b(1\.|2\.|3\.|- )", text) and marker_hits >= 2:
         return True
     return False
 

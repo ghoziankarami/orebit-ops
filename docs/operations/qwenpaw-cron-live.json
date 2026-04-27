@@ -352,5 +352,49 @@
       "misfire_grace_seconds": 60
     },
     "meta": {}
+  },
+  {
+    "id": "b09a2f17-6a4b-4af3-80ab-65983f8c855b",
+    "name": "Orebit RAG Wrapper Watchdog",
+    "enabled": true,
+    "schedule": {
+      "type": "cron",
+      "cron": "*/10 * * * *",
+      "timezone": "Etc/UTC"
+    },
+    "task_type": "agent",
+    "text": null,
+    "request": {
+      "input": [
+        {
+          "content": [
+            {
+              "text": "SILENT: Write to file ONLY. No chat messages.\n\n1. Run: bash /app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/watchdog-wrapper.sh\n2. Do not send any chat output.\n3. End silently after the script finishes.\n\nThis job keeps the local RAG API wrapper on port 3004 healthy and records runtime status outside the repo working tree.",
+              "type": "text"
+            }
+          ],
+          "role": "user",
+          "type": "message"
+        }
+      ],
+      "session_id": "cron:orebit-silent",
+      "user_id": "187945281"
+    },
+    "dispatch": {
+      "type": "channel",
+      "channel": "console",
+      "target": {
+        "user_id": "187945281",
+        "session_id": "cron:orebit-silent"
+      },
+      "mode": "final",
+      "meta": {}
+    },
+    "runtime": {
+      "max_concurrency": 1,
+      "timeout_seconds": 120,
+      "misfire_grace_seconds": 60
+    },
+    "meta": {}
   }
 ]

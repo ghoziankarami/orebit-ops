@@ -68,7 +68,7 @@
 
 ---
 
-## QwenPaw Cron Jobs (8 configured)
+## QwenPaw Cron Jobs (10 configured)
 
 All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` session targeting. This is the currently working silent pattern in this runtime; the older `channel: none` pattern was found to be broken and was replaced.
 
@@ -83,8 +83,9 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 | Orebit Obsidian Sync Backup | `96d1a253-...` | `30 */6 * * *` | ✅ Active | console |
 | Orebit PDF Paper Intake | `e61f4651-...` | `45 */6 * * *` | ✅ Active | console |
 | Orebit Embedding Server Watchdog | `4ca2c4e3-...` | `*/10 * * * *` | ✅ Active | console |
+| Orebit RAG Wrapper Watchdog | `b09a2f17-...` | `*/10 * * * *` | ✅ Active | console |
 
-> The autosync watchdog cron, chat-review stager, and embedding watchdog were manually test-run successfully after repair.
+> The autosync watchdog cron, chat-review stager, embedding watchdog, and RAG wrapper watchdog were manually test-run successfully after repair.
 
 ---
 
@@ -158,6 +159,10 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 - **Embedding server start script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/start-local-embedding-server.sh`
 - **Embedding server status script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/status-local-embedding-server.sh`
 - **Embedding server watchdog script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/watchdog-local-embedding-server.sh`
+- **RAG wrapper start script:** `/app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/start-wrapper.sh`
+- **RAG wrapper status script:** `/app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/status-wrapper.sh`
+- **RAG wrapper preflight script:** `/app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/preflight.sh`
+- **RAG wrapper watchdog script:** `/app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/watchdog-wrapper.sh`
 - **RAG script:** `/app/working/workspaces/default/orebit-ops/rag-system/rag_no_docker.py`
 
 ### Actual behavior
