@@ -81,8 +81,12 @@ Important scripts include:
 
 - Google Drive is the intended long-term source of truth across devices
 - this runtime uses split remotes: service-account read plus OAuth write
-- local vault cleanup can proceed without opening full-vault write automation
 - inbox-first automation remains the default sync model
+- continuous autosync is limited to `0. Inbox/` only
+- notes outside `0. Inbox/` are not part of the inbox daemon and are never pushed continuously
+- non-inbox changes reach Drive only through the guarded one-shot path in `ops/scripts/sync/push-vault-safe.sh`
+- `push-vault-safe.sh` uses `rclone copy --update`, so it does not delete remote files and it avoids overwriting newer remote copies
+- this means non-inbox sync is intentionally conservative: safe local-to-Drive promotion, not full two-way merge automation
 
 ## Recovery notes
 

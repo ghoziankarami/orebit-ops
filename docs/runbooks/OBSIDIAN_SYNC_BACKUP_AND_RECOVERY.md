@@ -71,4 +71,11 @@ bash ops/scripts/backup/backup-obsidian-sync-state.sh
 ## Important scope rule
 
 Only `0. Inbox` is automatically synchronized to Drive.
-Changes elsewhere in the vault remain local-only unless explicitly promoted with a separate workflow.
+Changes elsewhere in the vault are outside the daemon boundary and are only pushed when an explicit guarded workflow is used.
+
+Current non-inbox rule:
+- use `ops/scripts/sync/push-vault-safe.sh` for deliberate local-to-Drive promotion
+- this path uses `rclone copy --update`
+- it does not delete remote files
+- it does not overwrite newer remote files
+- it should be treated as conservative push, not as full bidirectional merge

@@ -16,7 +16,6 @@ Blocked by policy:
 - `2. Areas`
 - `3. Resources`
 - `4. Archive`
-- `4. Archives`
 - `Attachments`
 - `Templates`
 - `.obsidian`

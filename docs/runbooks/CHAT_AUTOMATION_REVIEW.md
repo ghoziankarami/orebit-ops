@@ -40,6 +40,7 @@ Examples of positive signals:
 Examples of negative signals:
 - tool-progress chatter
 - meta progress updates like `sudah saya...` or `yang saya update...`
+- stacktrace fragments or error-line snippets without synthesis
 - tiny acknowledgements
 - low-context conversational fragments
 

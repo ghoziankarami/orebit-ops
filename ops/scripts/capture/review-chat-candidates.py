@@ -83,6 +83,10 @@ REUSE_SIGNAL_PHRASES = (
     "promotion rule",
     "capture rule",
     "why this was staged",
+    "final state",
+    "audit result",
+    "hasil audit",
+    "the two failures are",
 )
 
 NOISE_TITLE_PREFIXES = (
@@ -95,6 +99,8 @@ NOISE_TITLE_PREFIXES = (
     "oke,",
     "ok,",
     "siap,",
+    "at ",
+    "saya sudah kerjakan",
 )
 
 NOISE_TITLE_CONTAINS = (
@@ -103,6 +109,10 @@ NOISE_TITLE_CONTAINS = (
     "amankan itu",
     "clear summary",
     "issue now",
+    "likely classification",
+    "chat candidate",
+    "status github tooling",
+    "berikut final state",
 )
 
 NOISE_BODY_PHRASES = (
@@ -227,6 +237,15 @@ def has_reuse_signal(text: str) -> bool:
     return False
 
 
+def looks_like_stacktrace_fragment(text: str) -> bool:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return False
+    if len(text) < 800 and any(line.startswith("at ") for line in lines[:5]):
+        return True
+    return False
+
+
 def score_text(text: str) -> int:
     lowered = text.lower()
     if any(phrase in lowered for phrase in SKIP_PHRASES):
@@ -234,6 +253,8 @@ def score_text(text: str) -> int:
     if any(phrase in lowered for phrase in NOISE_BODY_PHRASES):
         return 0
     if is_meta_progress_reply(text):
+        return 0
+    if looks_like_stacktrace_fragment(text):
         return 0
 
     score = 0

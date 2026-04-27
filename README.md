@@ -12,7 +12,7 @@ This repo is the canonical operational base for:
 - QwenPaw runtime and provider configuration
 - local-first RAG with local embeddings
 - Obsidian PARA workflow and capture rules
-- Google Drive sync for the vault orchestrated by QwenPaw-managed scripts and cron jobs
+- Google Drive sync for the vault orchestrated by QwenPaw-managed scripts and cron jobs, with continuous autosync limited to `0. Inbox/`
 - product-digital operating workflows
 
 ---

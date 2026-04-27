@@ -50,8 +50,8 @@ This file should be treated as the root-readable summary.
 - `0. Inbox/Papers/`
 - `3. Resources/Literature Notes/`
 - `3. Resources/Evergreen/`
-- `3. Resources/Tutorial/`
-- `3. Resources/Web Link/` *(legacy/promoted reference only; do not use as raw intake target)*
+- `3. Resources/Tutorials/`
+- `3. Resources/Reference Links/` *(canonical promoted link lane; use this instead of the old `Web Link` lane)*
 
 ---
 
