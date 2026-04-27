@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RAG Rebuild — No Docker Required
-Direct ChromaDB + sentence-transformers integration for the local Obsidian vault.
+Direct ChromaDB + local embeddings integration for the local Obsidian vault.
 """
 
 from __future__ import annotations
@@ -12,17 +12,19 @@ import re
 import sys
 from pathlib import Path
 import hashlib
+from typing import Any
 
 import chromadb
+import requests
 from sentence_transformers import SentenceTransformer
 
 # Persistent paths (NOT /workspace/)
 PERSIST_DIR = "/app/working/workspaces/default/file_store/chroma"
 VAULT_DIR = "/app/working/workspaces/default/obsidian-system/vault"
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Small, fast, good quality
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_API_URL = os.getenv("OREBIT_EMBEDDING_API_URL", "http://127.0.0.1:3005/v1/embeddings")
 COLLECTION_NAME = "vault_docs"
 
-# Prefer the durable second-brain surfaces that matter for operational retrieval.
 PRIORITY_DIR_MARKERS = (
     "0. Inbox",
     "1. Projects",
@@ -62,18 +64,43 @@ class NoDockerRAG:
     def __init__(self, persist_dir: str = PERSIST_DIR, embedding_model: str = EMBEDDING_MODEL):
         os.makedirs(persist_dir, exist_ok=True)
         self.client = chromadb.PersistentClient(path=persist_dir)
+        self.embedding_model_name = embedding_model
+        self._local_model: SentenceTransformer | None = None
+        self.embedding_mode = "api" if self._embedding_api_healthy() else "local"
 
-        print(f"Loading embedding model: {embedding_model}...")
-        self.embedding_model = SentenceTransformer(embedding_model)
-        print("Embedding model loaded.")
+        if self.embedding_mode == "local":
+            print(f"Loading embedding model locally: {embedding_model}...")
+            self._local_model = SentenceTransformer(embedding_model)
+            print("Embedding model loaded.")
+        else:
+            print(f"Using embedding API: {EMBEDDING_API_URL}")
 
         self.collection = self.client.get_or_create_collection(
             name=COLLECTION_NAME,
             metadata={"description": "Canonical Obsidian vault documents"},
         )
 
+    def _embedding_api_healthy(self) -> bool:
+        health_url = EMBEDDING_API_URL.replace("/v1/embeddings", "/health")
+        try:
+            resp = requests.get(health_url, timeout=5)
+            return resp.ok
+        except requests.RequestException:
+            return False
+
     def embed(self, texts: list[str]) -> list[list[float]]:
-        return self.embedding_model.encode(texts, show_progress_bar=False).tolist()
+        if self.embedding_mode == "api":
+            resp = requests.post(
+                EMBEDDING_API_URL,
+                json={"model": self.embedding_model_name, "input": texts},
+                timeout=120,
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+            return [item["embedding"] for item in payload["data"]]
+
+        assert self._local_model is not None
+        return self._local_model.encode(texts, show_progress_bar=False).tolist()
 
     def should_index_file(self, filepath: Path, vault_path: Path) -> tuple[bool, str]:
         rel = filepath.relative_to(vault_path)
@@ -82,19 +109,14 @@ class NoDockerRAG:
 
         if filepath.suffix.lower() not in {".md", ".txt"}:
             return False, "non-text"
-
         if any(part in EXCLUDED_PATH_PARTS for part in rel.parts):
             return False, "excluded-path"
-
         if rel.parts and rel.parts[0] == "4. Archive":
             return False, "archive"
-
         if any(re.match(pattern, name) for pattern in EXCLUDED_FILENAME_PATTERNS):
             return False, "routine-note"
-
         if not any(marker in rel_str for marker in PRIORITY_DIR_MARKERS):
             return False, "out-of-scope"
-
         return True, "ok"
 
     def path_weight(self, rel_path: str) -> float:
@@ -131,12 +153,11 @@ class NoDockerRAG:
                 score += 0.4
             if any(marker.lower() in lowered_name for marker in PRIORITY_FILE_MARKERS):
                 score += 0.3
-
         return score
 
     def ingest_file(self, filepath: Path, vault_path: Path) -> bool:
         try:
-            should_index, reason = self.should_index_file(filepath, vault_path)
+            should_index, _ = self.should_index_file(filepath, vault_path)
             if not should_index:
                 return False
 
@@ -185,7 +206,7 @@ class NoDockerRAG:
         print(f"Successfully ingested: {ingested}/{len(files)} documents")
         return ingested
 
-    def query(self, query_text: str, n_results: int = 5) -> dict:
+    def query(self, query_text: str, n_results: int = 5) -> dict[str, Any]:
         query_embedding = self.embed([query_text])[0]
         raw_results = self.collection.query(
             query_embeddings=[query_embedding],
@@ -218,9 +239,10 @@ class NoDockerRAG:
             "metadatas": [[item[3] for item in top]],
             "distances": [[item[4] for item in top]],
             "scores": [[round(item[0], 4) for item in top]],
+            "embedding_mode": self.embedding_mode,
         }
 
-    def get_stats(self) -> dict:
+    def get_stats(self) -> dict[str, Any]:
         count = self.collection.count()
         sample = self.collection.get(include=["metadatas"], limit=min(500, max(count, 1)))
         by_prefix: dict[str, int] = {}
@@ -228,7 +250,11 @@ class NoDockerRAG:
             rel = str((meta or {}).get("relative_path") or "")
             prefix = rel.split("/", 1)[0] if rel else "unknown"
             by_prefix[prefix] = by_prefix.get(prefix, 0) + 1
-        return {"total_documents": count, "by_prefix": by_prefix}
+        return {
+            "total_documents": count,
+            "by_prefix": by_prefix,
+            "embedding_mode": self.embedding_mode,
+        }
 
     def reset(self) -> None:
         try:

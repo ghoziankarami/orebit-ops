@@ -4,8 +4,10 @@ This folder contains the active local RAG runtime pieces used by `orebit-ops`.
 
 ## Canonical components
 
-- `rag_no_docker.py` - local ChromaDB + sentence-transformers RAG path
+- `rag_no_docker.py` - local ChromaDB + local-embedding RAG path with curated vault indexing and query reranking
 - `embedding_server.py` - local OpenAI-compatible embedding server on port `3005`
+- `../ops/scripts/sync/start-local-embedding-server.sh` - managed start helper for the embedding service
+- `../ops/scripts/sync/status-local-embedding-server.sh` - health/status helper for the embedding service
 - `api-wrapper/` - older wrapper-related code retained only as supporting legacy context
 
 ## Current rule

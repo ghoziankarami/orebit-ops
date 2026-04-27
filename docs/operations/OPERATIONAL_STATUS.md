@@ -28,7 +28,7 @@
 | 9router (ninerouter) | 20128 | ✅ Yes | ✅ Running | 8 retained models tested working |
 | OpenRouter (via QwenPaw) | 443 | ✅ Yes | ✅ Configured | 12 retained free models; some upstream rate-limited |
 | opencode_go | 443 | ✅ Yes | ✅ Tested | 5 retained models tested working |
-| Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings` |
+| Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings`; restored and verified again via managed start/status scripts |
 | QwenPaw memory search | — | ✅ Yes | ✅ Working | Remelight backend validated end-to-end against local embeddings |
 | Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker; canonical vault indexing now excludes archive/template/daily-note noise and better prioritizes inbox/SOP/workflow retrieval |
 | PDF-to-RAG paper intake | — | ✅ Yes | ✅ Working | PDF text can be ingested and draft notes can be written to `0. Inbox/Papers/` |
@@ -154,6 +154,8 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 - **Vault:** `/app/working/workspaces/default/obsidian-system/vault`
 - **Chroma store:** `/app/working/workspaces/default/file_store/chroma`
 - **Embedding server:** `/app/working/workspaces/default/orebit-ops/rag-system/embedding_server.py`
+- **Embedding server start script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/start-local-embedding-server.sh`
+- **Embedding server status script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/status-local-embedding-server.sh`
 - **RAG script:** `/app/working/workspaces/default/orebit-ops/rag-system/rag_no_docker.py`
 
 ### Actual behavior

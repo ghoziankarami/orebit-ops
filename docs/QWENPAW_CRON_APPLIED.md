@@ -1,6 +1,6 @@
 # QwenPaw Cron Applied
 
-> Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`
+> Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`, `qwenpaw cron state ...`, and manual one-off run checks
 
 ## All Cron Jobs (8 total)
 
