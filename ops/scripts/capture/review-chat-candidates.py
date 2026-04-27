@@ -56,6 +56,9 @@ SKIP_PHRASES = (
     "now i understand both issues clearly",
     "now i have a complete picture",
     "the two failures are",
+    "actually wait, let me check",
+    "this confirms that",
+    "the original file (before any of my fixes) had",
 )
 
 META_PROGRESS_PHRASES = (
@@ -151,6 +154,11 @@ NOISE_TITLE_CONTAINS = (
     "fundamental failure",
     "hasil audit 9router",
     "branch lama dipakai terlalu lama",
+    "bukti dari screenshot anda",
+    "9router - 8 models",
+    "9router — 8 models",
+    "rclone setup - hampir selesai",
+    "rclone setup — hampir selesai",
 )
 
 NOISE_BODY_PHRASES = (
@@ -167,6 +175,8 @@ NOISE_BODY_PHRASES = (
     "system.invalidoperationexception",
     "bagus — saya sudah cek live state anda",
     "iya, ketemunya di sini masalahnya",
+    "seelah restart dan test berulang",
+    "setelah restart dan test berulang",
 )
 
 
