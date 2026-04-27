@@ -35,11 +35,11 @@ To make `rag.orebit.id` fully independent with QwenPaw and Vercel, the repo must
 ## Decision
 
 Treat the current local RAG + QwenPaw + Obsidian system as the canonical backend/runtime foundation.
-Treat the public `rag.orebit.id` deployment surface as a missing but planned layer that must be rebuilt intentionally on top of this repo, not inferred from archived docs.
+Treat the restored legacy `rag-public/` frontend as the required UI baseline for `rag.orebit.id` so the public surface does not lose the old frontend during rebuild.
 
 ## Near-term recommendation
 
 1. Keep local RAG and Obsidian workflows canonical in `orebit-ops`
-2. Rebuild a minimal Vercel frontend in-repo
+2. Use the restored `rag-public/` app as the frontend baseline instead of inventing a new UI
 3. Point that frontend at a documented Orebit-controlled retrieval endpoint
 4. Document deploy and smoke test inside this repo
