@@ -68,15 +68,14 @@
 
 ---
 
-## QwenPaw Cron Jobs (10 configured)
+## QwenPaw Cron Jobs (9 configured)
 
 All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` session targeting. This is the currently working silent pattern in this runtime; the older `channel: none` pattern was found to be broken and was replaced.
 
 | Name | ID | Schedule | Status | Channel |
 |------|----|----------|--------|---------|
-| ArsariCore PR Checker | `0c608158-...` | `0 */6 * * *` | ❌ Disabled (budget) | telegram |
 | Orebit Autosync Watchdog | `11f98f40-...` | `*/5 * * * *` | ✅ Active | console |
-| Orebit Runtime Heartbeat | `d2f0a6fe-...` | `*/15 * * * *` | ✅ Active | console |
+| Orebit Runtime Heartbeat | `fd3c8a8c-...` | `*/15 * * * *` | ✅ Active | console |
 | Orebit Runtime Audit | `7449f8b2-...` | `0 */6 * * *` | ✅ Active | console |
 | Orebit Chat Review Stager | `cf81f82a-...` | `10 */6 * * *` | ✅ Active | console |
 | Orebit Vault Safe Push | `66fad5ea-...` | `15 */6 * * *` | ✅ Active | console |
@@ -225,7 +224,6 @@ Important current lanes include:
 | 🟡 MED | Example typed captures for geology/exploration/offshore/SOP/image requests | Workflow exists, examples still need to be populated |
 | 🟡 LOW | Inbox lane consolidation | `0. Inbox/` still contains canonical and legacy compatibility lanes side-by-side |
 | 🟡 LOW | API-wrapper data provider cleanup | Canonical wiring is restored, but the large legacy script still deserves cleanup and simplification |
-| 🟢 LOW | ArsariCore PR cron | Disabled by budget choice |
 
 **Completed:**
 - ✅ 9router restored and pruned to working models

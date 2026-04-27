@@ -2,28 +2,21 @@
 
 > Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`, `qwenpaw cron state ...`, and manual one-off run checks
 
-## All Cron Jobs (10 total)
+## All Cron Jobs (9 total)
 
-### 1. ArsariCore PR Checker
-- **ID:** `0c608158-265f-430e-816f-0c3192a856e0`
-- **Schedule:** `0 */6 * * *` (every 6 hours)
-- **Status:** ❌ **Disabled** (budget)
-- **Session:** `telegram:187945281`
-- **Task:** Review open PRs, mark ready if safe, merge if possible
-
-### 2. Orebit Autosync Watchdog
+### 1. Orebit Autosync Watchdog
 - **ID:** `11f98f40-e0e0-49a6-9dac-cba2651ef0ab`
 - **Schedule:** `*/5 * * * *` (every 5 min)
 - **Status:** ✅ Active
 - **Session:** `cron:orebit-silent` via `console` dispatch (silent — no Telegram)
 - **Task:** Check obsidian sync daemon, restart if dead, write status to file
 
-### 3. Orebit Runtime Heartbeat
-- **ID:** `d2f0a6fe-a3c6-47bc-9dcd-178a05de7ca0`
+### 2. Orebit Runtime Heartbeat
+- **ID:** `fd3c8a8c-05ff-4e2a-843a-d43f21b3b5d7`
 - **Schedule:** `*/15 * * * *` (every 15 min)
 - **Status:** ✅ Active
 - **Session:** `cron:orebit-silent` via `console` dispatch (silent — no Telegram)
-- **Task:** Write runtime state to file
+- **Task:** Append Orebit runtime health checks for QwenPaw, embedding, and wrapper to `/tmp/orebit-heartbeat.log`
 
 ### 4. Orebit Runtime Audit
 - **ID:** `7449f8b2-ded4-4682-979e-7825cb649d19`
@@ -78,7 +71,6 @@
 
 | Job | Silent? | Telegram? |
 |-----|---------|-----------|
-| ArsariCore PR Checker | ❌ | ✅ (but disabled) |
 | Autosync Watchdog | ✅ | ❌ |
 | Runtime Heartbeat | ✅ | ❌ |
 | Runtime Audit | ✅ | ❌ |
