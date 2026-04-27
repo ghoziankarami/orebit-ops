@@ -49,7 +49,7 @@ Inactive or legacy material.
 
 Low-conflict intake should land in:
 - `0. Inbox/Research/`
-- `0. Inbox/AI Sessions/`
+- `0. Inbox/Automation Inbox/`
 - `0. Inbox/Papers/`
 - other existing inbox subfolders when they are the natural destination
 

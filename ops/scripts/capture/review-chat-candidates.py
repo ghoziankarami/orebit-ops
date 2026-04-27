@@ -49,6 +49,42 @@ SKIP_PHRASES = (
     "i found",
 )
 
+META_PROGRESS_PHRASES = (
+    "sudah saya",
+    "yang saya update",
+    "yang saya ubah",
+    "yang saya tambahkan",
+    "lanjutannya sudah",
+    "saya lanjut",
+    "saya sudah lanjutkan",
+    "saya juga mulai",
+    "saya bisa atur ini",
+    "saya sudah cek semuanya",
+    "kabar bagus",
+    "hal yang sengaja tidak saya sentuh",
+    "natural next steps",
+    "kalau mau, next step",
+    "the user wants me to stop and summarize",
+    "let me give a clear summary",
+    "i stopped because the repo is no longer clean",
+    "i see the issue now",
+    "maaf, saya harus jujur",
+)
+
+REUSE_SIGNAL_PHRASES = (
+    "root cause",
+    "review procedure",
+    "destination examples",
+    "current system rule",
+    "simple model",
+    "working loop",
+    "operating sop",
+    "decision rule",
+    "promotion rule",
+    "capture rule",
+    "why this was staged",
+)
+
 NOISE_TITLE_PREFIXES = (
     "sudah saya",
     "yang saya",
@@ -65,6 +101,8 @@ NOISE_TITLE_CONTAINS = (
     "kabar bagus",
     "hasil penting",
     "amankan itu",
+    "clear summary",
+    "issue now",
 )
 
 NOISE_BODY_PHRASES = (
@@ -73,6 +111,9 @@ NOISE_BODY_PHRASES = (
     "sip, saya sudah amankan itu",
     "lanjutannya sudah beres",
     "bisa, dan sekarang sudah mulai saya atur",
+    "hal yang sengaja tidak saya sentuh",
+    "let me give a clear summary",
+    "the user wants me to stop and summarize",
 )
 
 
@@ -152,9 +193,38 @@ def infer_title(text: str, candidate_type: str) -> str:
         lowered = line.lower()
         if lowered.startswith(NOISE_TITLE_PREFIXES):
             continue
+        if any(fragment in lowered for fragment in NOISE_TITLE_CONTAINS):
+            continue
         if 18 <= len(line) <= 100:
             return line.rstrip(":.")
     return f"Chat candidate - {candidate_type}"
+
+
+def is_meta_progress_reply(text: str) -> bool:
+    lowered = text.lower()
+    if any(phrase in lowered for phrase in META_PROGRESS_PHRASES):
+        return True
+
+    first_lines = [line.strip().lower() for line in text.splitlines() if line.strip()][:3]
+    if any(line.startswith(NOISE_TITLE_PREFIXES) for line in first_lines):
+        return True
+    if any("summary" in line or "ringkas" in line for line in first_lines):
+        return True
+    if len(text) < 500 and any(line.startswith(("i see", "maaf", "sorry", "okay", "oke", "sip")) for line in first_lines):
+        return True
+
+    return False
+
+
+def has_reuse_signal(text: str) -> bool:
+    lowered = text.lower()
+    if any(phrase in lowered for phrase in REUSE_SIGNAL_PHRASES):
+        return True
+    if "## " in text or "```" in text:
+        return True
+    if re.search(r"\b(1\.|2\.|3\.|- )", text):
+        return True
+    return False
 
 
 def score_text(text: str) -> int:
@@ -163,6 +233,9 @@ def score_text(text: str) -> int:
         return 0
     if any(phrase in lowered for phrase in NOISE_BODY_PHRASES):
         return 0
+    if is_meta_progress_reply(text):
+        return 0
+
     score = 0
     if len(text) >= 900:
         score += 2
@@ -174,10 +247,14 @@ def score_text(text: str) -> int:
         score += 1
     if any(keyword in lowered for keyword in KEYWORD_TO_TYPE):
         score += 2
-    if any(keyword in lowered for keyword in ("recommend", "should", "next step", "deploy", "capture", "research", "workflow", "sop", "root cause", "option a", "option b")):
+    if any(keyword in lowered for keyword in ("recommend", "should", "deploy", "capture", "research", "workflow", "sop", "root cause", "review", "procedure", "decision", "criteria")):
         score += 2
     if any(marker in lowered for marker in ("what i changed", "what i added", "yang saya pasang", "root cause analysis", "review rules")):
         score += 2
+    if has_reuse_signal(text):
+        score += 2
+    if len(text) < 700 and not has_reuse_signal(text):
+        return 0
     return score
 
 

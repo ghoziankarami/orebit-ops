@@ -26,7 +26,7 @@ Fast intake and low-friction capture.
 
 Expected lanes:
 - `0. Inbox/Research/`
-- `0. Inbox/AI Sessions/`
+- `0. Inbox/Automation Inbox/`
 - `0. Inbox/Papers/`
 - `0. Inbox/Reading Inbox/`
 - `0. Inbox/Links/`

@@ -29,14 +29,17 @@ Stage likely high-value chat outputs from `dialog/*.jsonl` into `0. Inbox/Automa
 ## Default behavior
 
 The reviewer only stages assistant messages that look structured or reusable enough to matter later.
+Short replies now need stronger reuse signals; meta progress/status answers are intentionally filtered out even when they mention real work.
 Examples of positive signals:
 - clear headings
 - enumerated steps
 - workflow/SOP/research language
+- explicit review/procedure/decision structure
 - longer synthesis rather than tiny chat fragments
 
 Examples of negative signals:
 - tool-progress chatter
+- meta progress updates like `sudah saya...` or `yang saya update...`
 - tiny acknowledgements
 - low-context conversational fragments
 

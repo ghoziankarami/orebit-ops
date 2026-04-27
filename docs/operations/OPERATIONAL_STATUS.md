@@ -171,7 +171,7 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 
 Important current lanes include:
 - `0. Inbox/Research/`
-- `0. Inbox/AI Sessions/`
+- `0. Inbox/Automation Inbox/`
 - `1. Projects/Research Programs/`
 - `1. Projects/Product Studio/`
 - `3. Resources/Research Notes/`

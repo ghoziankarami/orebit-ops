@@ -8,7 +8,7 @@ Use for quick capture, not permanent storage.
 
 Examples:
 - `Research/` for raw research questions
-- `AI Sessions/` for useful but still-rough AI outputs
+- `Automation Inbox/` for low-confidence automation output that still needs review
 - `Papers/` for paper intake
 - `Reading Inbox/` for reading backlog
 - `Links/` and `Link Inbox/` for URLs

@@ -31,7 +31,7 @@ Use QwenPaw to think, compare, question, synthesize, and draft.
 When something is useful, first save it into a low-conflict capture lane such as:
 
 - `0. Inbox/Research/`
-- `0. Inbox/AI Sessions/`
+- `0. Inbox/Automation Inbox/`
 - `0. Inbox/Papers/`
 
 ### Stage 3: classify the output
