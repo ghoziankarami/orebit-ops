@@ -73,7 +73,7 @@ The target state for `rag.orebit.id` is:
 The repo now has the right pieces, but the final reproducible production runbook still depends on:
 - choosing the actual Orebit-controlled host/process manager for `rag-system/api-wrapper/`
 - documenting exact environment variables and startup commands for that host
-- adding a smoke-test sequence for deploy and rollback
+- enforcing the smoke-test and rollback sequence as part of deploy, not as optional follow-up
 
 ## Decision
 

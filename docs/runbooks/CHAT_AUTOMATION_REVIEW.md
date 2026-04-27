@@ -41,6 +41,7 @@ Examples of negative signals:
 - tool-progress chatter
 - meta progress updates like `sudah saya...` or `yang saya update...`
 - audit/status summaries that mainly report what was checked or fixed
+- first-person progress reports dominated by actions like check/update/commit/push/restart/fix
 - table/header fragments or path-only titles
 - stacktrace fragments or error-line snippets without synthesis
 - tiny acknowledgements

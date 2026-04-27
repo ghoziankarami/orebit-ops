@@ -59,6 +59,13 @@ SKIP_PHRASES = (
     "actually wait, let me check",
     "this confirms that",
     "the original file (before any of my fixes) had",
+    "winget install rclone.rclone",
+    "right-click folder",
+    "copy code yang muncul",
+    "copy code that appears",
+    "url oauth untuk dibuka",
+    "service account",
+    "localhost callback",
 )
 
 META_PROGRESS_PHRASES = (
@@ -112,6 +119,9 @@ REUSE_SIGNAL_PHRASES = (
     "promotion target",
     "operating model",
     "canonical lane",
+    "prevention rule",
+    "guardrail",
+    "failure mode",
 )
 
 NOISE_TITLE_PREFIXES = (
@@ -127,6 +137,9 @@ NOISE_TITLE_PREFIXES = (
     "at ",
     "now i understand",
     "now i have",
+    "now i see",
+    "actually, let me",
+    "step-by-step",
     "the two failures are",
     "| ",
     "1. ",
@@ -135,6 +148,8 @@ NOISE_TITLE_PREFIXES = (
     "iya,",
     "bagus",
     "i see the issue",
+    "✅",
+    "🔧",
 )
 
 NOISE_TITLE_CONTAINS = (
@@ -159,6 +174,10 @@ NOISE_TITLE_CONTAINS = (
     "9router — 8 models",
     "rclone setup - hampir selesai",
     "rclone setup — hampir selesai",
+    "windows",
+    "oauth",
+    "sudah selesai",
+    "semua 4 task selesai",
 )
 
 NOISE_BODY_PHRASES = (
@@ -177,6 +196,48 @@ NOISE_BODY_PHRASES = (
     "iya, ketemunya di sini masalahnya",
     "seelah restart dan test berulang",
     "setelah restart dan test berulang",
+)
+
+PROGRESS_ACTION_WORDS = (
+    "cek",
+    "check",
+    "inspect",
+    "audit",
+    "update",
+    "ubah",
+    "edit",
+    "commit",
+    "push",
+    "restart",
+    "start",
+    "jalankan",
+    "run",
+    "test",
+    "verify",
+    "validated",
+    "fix",
+    "repair",
+    "hapus",
+    "remove",
+    "buat",
+    "create",
+    "tambah",
+    "add",
+)
+
+SITUATIONAL_HELP_PHRASES = (
+    "windows",
+    "browser",
+    "oauth",
+    "share folder",
+    "service account",
+    "copy code",
+    "right-click",
+    "winget install",
+    "localhost callback",
+    "open this url",
+    "buka url",
+    "auth code",
 )
 
 
@@ -309,6 +370,26 @@ def has_reuse_signal(text: str) -> bool:
     return False
 
 
+def looks_like_progress_report(text: str) -> bool:
+    lowered = text.lower()
+    first_chunk = " ".join(line.strip().lower() for line in text.splitlines()[:8] if line.strip())
+    first_person_hits = sum(first_chunk.count(token) for token in (" saya ", " aku ", " i ", " i'm ", " i’ve ", " i've "))
+    action_hits = sum(1 for word in PROGRESS_ACTION_WORDS if word in first_chunk)
+
+    if action_hits >= 3 and ("saya" in first_chunk or "i " in first_chunk or "i'm" in first_chunk):
+        return True
+    if first_person_hits >= 2 and action_hits >= 2 and not has_reuse_signal(text):
+        return True
+    return False
+
+
+def looks_like_situational_operator_help(text: str) -> bool:
+    lowered = text.lower()
+    if sum(1 for phrase in SITUATIONAL_HELP_PHRASES if phrase in lowered) >= 2 and not has_reuse_signal(text):
+        return True
+    return False
+
+
 def looks_like_stacktrace_fragment(text: str) -> bool:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines:
@@ -342,6 +423,10 @@ def score_text(text: str) -> int:
     if any(phrase in lowered for phrase in NOISE_BODY_PHRASES):
         return 0
     if is_meta_progress_reply(text):
+        return 0
+    if looks_like_progress_report(text):
+        return 0
+    if looks_like_situational_operator_help(text):
         return 0
     if looks_like_stacktrace_fragment(text):
         return 0

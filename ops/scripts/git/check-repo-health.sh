@@ -20,4 +20,7 @@ if git diff --quiet && git diff --cached --quiet; then
 else
   echo 'status=dirty'
   git status --short
+  if git diff --name-only | grep -qx 'docs/operations/OBSIDIAN_INBOX_AUTOSYNC_STATUS.md'; then
+    echo 'note=runtime-status-churn-detected'
+  fi
 fi

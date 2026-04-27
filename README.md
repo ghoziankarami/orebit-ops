@@ -64,6 +64,7 @@ orebit-ops/
 ### Memory and RAG
 - local embedding server on port `3005`
 - local embedding model `all-MiniLM-L6-v2`
+- local embedding watchdog via QwenPaw cron
 - local ChromaDB persistence
 - no Docker required for the active RAG path
 
@@ -99,3 +100,4 @@ orebit-ops/
 
 Do not trust stale docs in `docs/archived/` for runtime decisions.
 Use `docs/operations/OPERATIONAL_STATUS.md` as the source of truth.
+Treat `docs/operations/OBSIDIAN_INBOX_AUTOSYNC_STATUS.md` as runtime status churn, not a canonical repo change.

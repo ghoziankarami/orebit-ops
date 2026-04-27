@@ -143,7 +143,15 @@ Then redeploy after env changes.
 
 ## Production smoke test
 
+Do not call the deploy green until all checks below pass.
+
 After deploy:
+
+### 0. Backend preflight
+- verify local embedding health: `curl http://127.0.0.1:3005/health`
+- verify wrapper health: `curl http://127.0.0.1:3004/api/rag/health`
+- verify wrapper stats: `curl http://127.0.0.1:3004/api/rag/stats`
+- only proceed if these are healthy
 
 ### 1. Frontend loads
 - open `rag.orebit.id`

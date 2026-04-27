@@ -25,4 +25,6 @@ if [ "$worktree_count" -gt 1 ] && [ "${ALLOW_MULTI_WORKTREE_COMMIT:-}" != "1" ];
   exit 1
 fi
 
+"$(git rev-parse --show-toplevel)/ops/scripts/git/check-runtime-guardrails.sh"
+
 exit 0

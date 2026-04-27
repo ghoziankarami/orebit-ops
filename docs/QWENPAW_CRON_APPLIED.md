@@ -2,7 +2,7 @@
 
 > Last verified: 2026-04-27 — Source: `qwenpaw cron list --agent-id default`, `qwenpaw cron state ...`, and manual one-off run checks
 
-## All Cron Jobs (8 total)
+## All Cron Jobs (9 total)
 
 ### 1. ArsariCore PR Checker
 - **ID:** `0c608158-265f-430e-816f-0c3192a856e0`
@@ -60,6 +60,13 @@
 - **Session:** `cron:orebit-silent` via `console` dispatch (silent — no Telegram)
 - **Task:** Run `ops/scripts/capture/review-chat-candidates.py` to stage conservative transcript candidates into `0. Inbox/Automation Inbox/`
 
+### 9. Orebit Embedding Server Watchdog
+- **ID:** `4ca2c4e3-26ea-4519-bd83-3b75d51cf054`
+- **Schedule:** `*/10 * * * *` (every 10 min)
+- **Status:** ✅ Active
+- **Session:** `cron:orebit-silent` via `console` dispatch (silent — no Telegram)
+- **Task:** Run `ops/scripts/sync/watchdog-local-embedding-server.sh` to keep the local embedding service on `3005` healthy and write runtime status outside the repo tree
+
 ## Summary
 
 | Job | Silent? | Telegram? |
@@ -72,5 +79,6 @@
 | Vault Safe Push | ✅ | ❌ |
 | PDF Paper Intake | ✅ | ❌ |
 | Chat Review Stager | ✅ | ❌ |
+| Embedding Server Watchdog | ✅ | ❌ |
 
 **User preference:** All cron jobs must be silent. Telegram output only on explicit request.

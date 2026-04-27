@@ -28,7 +28,7 @@
 | 9router (ninerouter) | 20128 | ✅ Yes | ✅ Running | 8 retained models tested working |
 | OpenRouter (via QwenPaw) | 443 | ✅ Yes | ✅ Configured | 12 retained free models; some upstream rate-limited |
 | opencode_go | 443 | ✅ Yes | ✅ Tested | 5 retained models tested working |
-| Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings`; restored and verified again via managed start/status scripts |
+| Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings`; restored and verified again via managed start/status scripts plus dedicated watchdog cron |
 | QwenPaw memory search | — | ✅ Yes | ✅ Working | Remelight backend validated end-to-end against local embeddings |
 | Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker; canonical vault indexing now excludes archive/template/daily-note noise and better prioritizes inbox/SOP/workflow retrieval |
 | PDF-to-RAG paper intake | — | ✅ Yes | ✅ Working | PDF text can be ingested and draft notes can be written to `0. Inbox/Papers/` |
@@ -82,8 +82,9 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 | Orebit Vault Safe Push | `66fad5ea-...` | `15 */6 * * *` | ✅ Active | console |
 | Orebit Obsidian Sync Backup | `96d1a253-...` | `30 */6 * * *` | ✅ Active | console |
 | Orebit PDF Paper Intake | `e61f4651-...` | `45 */6 * * *` | ✅ Active | console |
+| Orebit Embedding Server Watchdog | `4ca2c4e3-...` | `*/10 * * * *` | ✅ Active | console |
 
-> The autosync watchdog cron and the chat-review stager were both manually test-run successfully after the channel repair.
+> The autosync watchdog cron, chat-review stager, and embedding watchdog were manually test-run successfully after repair.
 
 ---
 
@@ -156,6 +157,7 @@ All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` 
 - **Embedding server:** `/app/working/workspaces/default/orebit-ops/rag-system/embedding_server.py`
 - **Embedding server start script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/start-local-embedding-server.sh`
 - **Embedding server status script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/status-local-embedding-server.sh`
+- **Embedding server watchdog script:** `/app/working/workspaces/default/orebit-ops/ops/scripts/sync/watchdog-local-embedding-server.sh`
 - **RAG script:** `/app/working/workspaces/default/orebit-ops/rag-system/rag_no_docker.py`
 
 ### Actual behavior
@@ -246,3 +248,4 @@ If you clone this repo fresh:
 - [ ] Verify vault exists at `/app/working/workspaces/default/obsidian-system/vault`
 - [ ] Rebuild or re-run local RAG ingest if needed
 - [ ] Verify both rclone remotes: `gdrive-obsidian` for read and `gdrive-obsidian-oauth` for write if Drive sync is needed
+- [ ] Treat `docs/operations/OBSIDIAN_INBOX_AUTOSYNC_STATUS.md` as runtime churn, not a canonical repo change, unless explicitly editing its structure/content

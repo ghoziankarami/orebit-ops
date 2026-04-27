@@ -23,4 +23,6 @@ case "$remote_name" in
     ;;
 esac
 
+"$(git rev-parse --show-toplevel)/ops/scripts/git/check-runtime-guardrails.sh"
+
 exit 0
