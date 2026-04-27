@@ -29,6 +29,22 @@ Use these to turn chat outputs into typed notes.
 
 Use this for legacy lineages such as `PINN-Geostat-Augmented`.
 
+## 6. How to rebuild `rag.orebit.id`
+- `docs/workflows/RAG_OREBIT_ID_DEPLOYMENT_TARGET.md`
+- `docs/runbooks/RAG_OREBIT_ID_DEPLOY.md`
+
+Use these for the preserved frontend baseline, wrapper contract, and deploy path.
+
+## 7. How inbox cleanup should work
+- `docs/workflows/INBOX_CURATION_PLAN.md`
+
+Use this to keep `0. Inbox/` safe while gradually consolidating legacy lanes.
+
+## 8. How staged chat-review automation works
+- `docs/runbooks/CHAT_AUTOMATION_REVIEW.md`
+
+Use this for transcript-to-Automation-Inbox staging, review queue behavior, and the conservative reviewer flow.
+
 ## Simple mental model
 - ask in QwenPaw
 - capture in Inbox

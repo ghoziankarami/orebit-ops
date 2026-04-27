@@ -1,11 +1,11 @@
 [
   {
-    "id": "0c608158-265f-430e-816f-0c3192a856e0",
-    "name": "ArsariCore PR Checker",
-    "enabled": false,
+    "id": "cf81f82a-d6f0-4d7e-b73f-38ac4f61102c",
+    "name": "Orebit Chat Review Stager",
+    "enabled": true,
     "schedule": {
       "type": "cron",
-      "cron": "0 */6 * * *",
+      "cron": "10 */6 * * *",
       "timezone": "Etc/UTC"
     },
     "task_type": "agent",
@@ -15,7 +15,7 @@
         {
           "content": [
             {
-              "text": "Review dan cek semua PR open di ArsariCore-. Tandai sebagai ready jika aman, merge jika memungkinkan. Kirim laporan hasilnya kesini.",
+              "text": "SILENT: Write to file ONLY. No chat messages.\\n\\n1. Run: cd /app/working/workspaces/default/orebit-ops && python3 ops/scripts/capture/review-chat-candidates.py\\n2. Do not send any chat output.\\n3. End silently after the script finishes.\\n\\nThis job stages conservative chat-review candidates into the Obsidian Automation Inbox and updates the queue note.",
               "type": "text"
             }
           ],
@@ -23,15 +23,15 @@
           "type": "message"
         }
       ],
-      "session_id": "telegram:187945281",
+      "session_id": "cron:orebit-silent",
       "user_id": "187945281"
     },
     "dispatch": {
       "type": "channel",
-      "channel": "telegram",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
-        "session_id": "telegram:187945281"
+        "session_id": "cron:orebit-silent"
       },
       "mode": "final",
       "meta": {}
@@ -44,7 +44,7 @@
     "meta": {}
   },
   {
-    "id": "f54e6ef2-e289-4bca-89cf-782c4af36745",
+    "id": "11f98f40-e0e0-49a6-9dac-cba2651ef0ab",
     "name": "Orebit Autosync Watchdog",
     "enabled": true,
     "schedule": {
@@ -73,7 +73,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"
@@ -89,7 +89,7 @@
     "meta": {}
   },
   {
-    "id": "4ef3ddcf-7293-4bb4-9bf4-abf4b50c754d",
+    "id": "d2f0a6fe-a3c6-47bc-9dcd-178a05de7ca0",
     "name": "Orebit Runtime Heartbeat",
     "enabled": true,
     "schedule": {
@@ -118,7 +118,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"
@@ -134,7 +134,7 @@
     "meta": {}
   },
   {
-    "id": "8c0c034c-9437-45f2-b075-ce17066f9d6a",
+    "id": "96d1a253-1884-4b21-95b5-4d0b51353340",
     "name": "Orebit Obsidian Sync Backup",
     "enabled": true,
     "schedule": {
@@ -162,7 +162,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"
@@ -178,7 +178,7 @@
     "meta": {}
   },
   {
-    "id": "090dc9b4-6108-41c5-9738-34fcee51bf99",
+    "id": "7449f8b2-ded4-4682-979e-7825cb649d19",
     "name": "Orebit Runtime Audit",
     "enabled": true,
     "schedule": {
@@ -206,7 +206,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"
@@ -222,7 +222,7 @@
     "meta": {}
   },
   {
-    "id": "0b237f7e-3a90-42d3-a3c6-0ab1b0875e54",
+    "id": "66fad5ea-2436-4145-ace5-60cd2bc22841",
     "name": "Orebit Vault Safe Push",
     "enabled": true,
     "schedule": {
@@ -250,7 +250,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"
@@ -266,7 +266,7 @@
     "meta": {}
   },
   {
-    "id": "c7d39d39-4747-4f7a-a44b-82d3a127e31a",
+    "id": "e61f4651-3b6e-4423-a03c-c1bdc0e4c057",
     "name": "Orebit PDF Paper Intake",
     "enabled": true,
     "schedule": {
@@ -294,7 +294,7 @@
     },
     "dispatch": {
       "type": "channel",
-      "channel": "none",
+      "channel": "console",
       "target": {
         "user_id": "187945281",
         "session_id": "cron:orebit-silent"

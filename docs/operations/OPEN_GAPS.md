@@ -19,6 +19,7 @@ Last updated: 2026-04-26
 - [x] Installed local ChromaDB persistence
 - [x] Installed local embedding server on port `3005`
 - [x] Pointed QwenPaw embedding config to local embedding server
+- [x] Validated QwenPaw memory search end-to-end against the local embedding backend
 
 ### Obsidian and PARA
 - [x] Verified canonical PARA layout from runbooks and older docs
@@ -31,9 +32,10 @@ Last updated: 2026-04-26
 ## In Progress
 
 - [ ] Complete one clean full-vault sync verification against Google Drive
-- [ ] Validate QwenPaw memory search end-to-end using the local embedding backend
 - [ ] Continue local vault curation for research, fleeting notes, and legacy knowledge promotion
 - [ ] Add concrete example notes that exercise the new QwenPaw research-playground templates
+- [ ] Wire `rag.orebit.id` to a reproducible Orebit-controlled backend/API deployment path using `rag-public/` and `rag-system/api-wrapper/`
+- [ ] Simplify and clean up `rag-system/api-wrapper/rag_public_data.py` now that canonical local corpus wiring has been restored
 - [ ] Update canonical docs and runbooks to reflect the new knowledge architecture and capture workflow
 
 ---

@@ -2,11 +2,11 @@
 
 ## Last Update
 <!-- auto-updated by watchdog heartbeat -->
-Last check: <!-- INSERT_TIMESTAMP -->
+Last check: 2026-04-27T03:28:43+00:00
 
 ## Daemon Status
-- PID: <!-- INSERT_PID -->
-- Status: <!-- INSERT_STATUS -->
+- PID: 723138
+- Status: RUNNING
 - Interval: 300 seconds (5 minutes)
 - Scope: ONLY `0. Inbox` (all other folders HARDENED/blocked)
 

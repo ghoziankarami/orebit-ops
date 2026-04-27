@@ -38,21 +38,36 @@ warnings.filterwarnings(
 )
 import requests
 
-WORKSPACE = Path('/workspace/rag-system')
-REPO_ROOT = Path('/workspace/orebit-rag-deploy')
-LEGACY_PAPERS_DB = WORKSPACE / '.vector_db' / 'papers'
-REPO_PAPERS_DB = REPO_ROOT / 'rag-system' / 'chroma'
-PAPERS_DB = LEGACY_PAPERS_DB if (LEGACY_PAPERS_DB / 'chroma.sqlite3').exists() else REPO_PAPERS_DB
+WORKSPACE_ROOT = Path(os.getenv('OREBIT_WORKSPACE_ROOT', '/app/working/workspaces/default'))
+VAULT_ROOT = Path(os.getenv('OREBIT_VAULT_ROOT', str(WORKSPACE_ROOT / 'obsidian-system' / 'vault')))
+CHROMA_ROOT = Path(os.getenv('OREBIT_CHROMA_ROOT', str(WORKSPACE_ROOT / 'file_store' / 'chroma')))
+
+LEGACY_WORKSPACE = Path('/workspace/rag-system')
+LEGACY_REPO_ROOT = Path('/workspace/orebit-rag-deploy')
+LEGACY_PAPERS_DB = LEGACY_WORKSPACE / '.vector_db' / 'papers'
+LEGACY_REPO_PAPERS_DB = LEGACY_REPO_ROOT / 'rag-system' / 'chroma'
+
+if (CHROMA_ROOT / 'chroma.sqlite3').exists():
+    PAPERS_DB = CHROMA_ROOT
+elif LEGACY_PAPERS_DB.joinpath('chroma.sqlite3').exists():
+    PAPERS_DB = LEGACY_PAPERS_DB
+else:
+    PAPERS_DB = LEGACY_REPO_PAPERS_DB
+
 CHROMA_SQLITE = PAPERS_DB / 'chroma.sqlite3'
-INDEX_STATE_PAPERS = LEGACY_PAPERS_DB / 'index_state_papers.json'
-PAPERS_COLLECTION = 'papers'
-SUMMARIES_COLLECTION = 'papers_summary'
-PAPERS_COLLECTION_FALLBACKS = ('papers', 'research_papers')
-SUMMARIES_COLLECTION_FALLBACKS = ('papers_summary',)
-OBSIDIAN_PAPERS_DIR = Path('/data/obsidian/3. Resources/Papers')
-ACTIVE_PDF_ROOT = Path('/mnt/gdrive/AI_Knowledge')
-TRACKER_PATH = WORKSPACE / 'research' / 'paper-tracker' / 'papers.json'
-PAPER_PARITY_STATE = WORKSPACE / '.state' / 'paper_count_parity.json'
+INDEX_STATE_PAPERS = Path(os.getenv('OREBIT_INDEX_STATE_PAPERS', str(WORKSPACE_ROOT / 'file_store' / 'index_state_papers.json')))
+PAPERS_COLLECTION = os.getenv('OREBIT_PAPERS_COLLECTION', 'paper_docs')
+SUMMARIES_COLLECTION = os.getenv('OREBIT_SUMMARIES_COLLECTION', 'papers_summary')
+PAPERS_COLLECTION_FALLBACKS = tuple(
+    name.strip() for name in os.getenv('OREBIT_PAPERS_COLLECTION_FALLBACKS', 'paper_docs,papers,research_papers').split(',') if name.strip()
+)
+SUMMARIES_COLLECTION_FALLBACKS = tuple(
+    name.strip() for name in os.getenv('OREBIT_SUMMARIES_COLLECTION_FALLBACKS', 'papers_summary').split(',') if name.strip()
+)
+OBSIDIAN_PAPERS_DIR = Path(os.getenv('OREBIT_OBSIDIAN_PAPERS_DIR', str(VAULT_ROOT / '3. Resources' / 'Papers')))
+ACTIVE_PDF_ROOT = Path(os.getenv('OREBIT_ACTIVE_PDF_ROOT', str(OBSIDIAN_PAPERS_DIR)))
+TRACKER_PATH = Path(os.getenv('OREBIT_TRACKER_PATH', str(WORKSPACE_ROOT / 'file_store' / 'paper-tracker' / 'papers.json')))
+PAPER_PARITY_STATE = Path(os.getenv('OREBIT_PAPER_PARITY_STATE', str(WORKSPACE_ROOT / 'file_store' / 'paper_count_parity.json')))
 LLM_MODEL = os.getenv('OPENROUTER_MODEL', 'openai/gpt-oss-120b:free')
 LLM_URL = os.getenv('OPENROUTER_URL', 'https://openrouter.ai/api/v1/chat/completions')
 
@@ -370,7 +385,7 @@ def extract_key_findings(body: str) -> list[str]:
 
 def build_obsidian_uri(path: Path) -> str | None:
     try:
-        relative = path.relative_to(Path('/data/obsidian'))
+        relative = path.relative_to(VAULT_ROOT)
     except Exception:
         return None
     relative_text = str(relative).replace('\\', '/')
@@ -401,7 +416,7 @@ def extract_note_record(path: Path) -> dict[str, Any] | None:
     note_summary = trim(overview or significance or snippet, 900)
     relative_path = None
     try:
-        relative_path = str(path.relative_to(Path('/data/obsidian'))).replace('\\', '/')
+        relative_path = str(path.relative_to(VAULT_ROOT)).replace('\\', '/')
     except Exception:
         relative_path = path.name
     return {
@@ -1639,7 +1654,7 @@ def main() -> int:
     p_answer.add_argument('--history', type=str, default='[]')
 
     args = parser.parse_args()
-    use_live_store = CHROMA_SQLITE.exists() and PAPERS_DB == REPO_PAPERS_DB
+    use_live_store = CHROMA_SQLITE.exists()
     store = PaperRagStore() if use_live_store else SafePaperRagStore()
 
     if args.command == 'stats':

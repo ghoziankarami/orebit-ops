@@ -88,6 +88,10 @@ orebit-ops/
 - `docs/workflows/OBSIDIAN_TEMPLATE_SYSTEM.md`
 - `docs/workflows/LEGACY_RESEARCH_BRIDGE.md`
 - `docs/setup/RCLONE_SETUP.md`
+- `docs/workflows/RAG_OREBIT_ID_DEPLOYMENT_TARGET.md`
+- `docs/runbooks/RAG_OREBIT_ID_DEPLOY.md`
+- `docs/workflows/INBOX_CURATION_PLAN.md`
+- `docs/runbooks/CHAT_AUTOMATION_REVIEW.md`
 
 ---
 

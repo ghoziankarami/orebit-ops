@@ -29,8 +29,10 @@
 | OpenRouter (via QwenPaw) | 443 | ✅ Yes | ✅ Configured | 12 retained free models; some upstream rate-limited |
 | opencode_go | 443 | ✅ Yes | ✅ Tested | 5 retained models tested working |
 | Local Embedding Server | 3005 | ✅ Yes | ✅ Running | `all-MiniLM-L6-v2`, OpenAI-compatible `/v1/embeddings` |
+| QwenPaw memory search | — | ✅ Yes | ✅ Working | Remelight backend validated end-to-end against local embeddings |
 | Local RAG | — | ✅ Yes | ✅ Working | ChromaDB + local embeddings, no Docker |
 | PDF-to-RAG paper intake | — | ✅ Yes | ✅ Working | PDF text can be ingested and draft notes can be written to `0. Inbox/Papers/` |
+| RAG API wrapper data provider | — | ✅ Yes | ✅ Working | `rag_public_data.py` now reads the canonical local Chroma corpus and live paper summaries; broader cleanup of old assumptions is still desirable |
 | Obsidian Vault | — | ✅ Yes | ✅ Present | `/app/working/workspaces/default/obsidian-system/vault` |
 | Google Drive read access | — | ✅ Yes | ✅ Healthy | Folder is visible through rclone service-account remote |
 | Google Drive inbox write access | — | ✅ Yes | ✅ Healthy | OAuth remote tested with small write/delete and used for inbox push |
@@ -66,21 +68,22 @@
 
 ---
 
-## QwenPaw Cron Jobs (7 configured)
+## QwenPaw Cron Jobs (8 configured)
 
-All silent — write to files only, no Telegram messages.
+All Orebit automation jobs now use `console` dispatch with `cron:orebit-silent` session targeting. This is the currently working silent pattern in this runtime; the older `channel: none` pattern was found to be broken and was replaced.
 
 | Name | ID | Schedule | Status | Channel |
 |------|----|----------|--------|---------|
 | ArsariCore PR Checker | `0c608158-...` | `0 */6 * * *` | ❌ Disabled (budget) | telegram |
-| Orebit Autosync Watchdog | `f54e6ef2-...` | `*/5 * * * *` | ✅ Active | none |
-| Orebit Runtime Heartbeat | `4ef3ddcf-...` | `*/15 * * * *` | ✅ Active | none |
-| Orebit Runtime Audit | `090dc9b4-...` | `0 */6 * * *` | ✅ Active | none |
-| Orebit Vault Safe Push | `0b237f7e-...` | `15 */6 * * *` | ✅ Active | none |
-| Orebit Obsidian Sync Backup | `8c0c034c-...` | `30 */6 * * *` | ✅ Active | none |
-| Orebit PDF Paper Intake | `c7d39d39-...` | `45 */6 * * *` | ✅ Active | none |
+| Orebit Autosync Watchdog | `11f98f40-...` | `*/5 * * * *` | ✅ Active | console |
+| Orebit Runtime Heartbeat | `d2f0a6fe-...` | `*/15 * * * *` | ✅ Active | console |
+| Orebit Runtime Audit | `7449f8b2-...` | `0 */6 * * *` | ✅ Active | console |
+| Orebit Chat Review Stager | `cf81f82a-...` | `10 */6 * * *` | ✅ Active | console |
+| Orebit Vault Safe Push | `66fad5ea-...` | `15 */6 * * *` | ✅ Active | console |
+| Orebit Obsidian Sync Backup | `96d1a253-...` | `30 */6 * * *` | ✅ Active | console |
+| Orebit PDF Paper Intake | `e61f4651-...` | `45 */6 * * *` | ✅ Active | console |
 
-> The autosync watchdog cron is active and the inbox push path now uses the OAuth write remote.
+> The autosync watchdog cron and the chat-review stager were both manually test-run successfully after the channel repair.
 
 ---
 
@@ -160,7 +163,9 @@ All silent — write to files only, no Telegram messages.
 - Local container vault is the working mirror used for indexing and automation.
 - RAG indexing is local-only and does not require Docker.
 - Embeddings are generated locally with `all-MiniLM-L6-v2`.
+- QwenPaw memory search is validated end-to-end through the Remelight backend using the local embedding service on `3005`.
 - QwenPaw chat should be treated as an exploration surface; durable outputs should be promoted into typed vault notes.
+- Low-confidence transcript review is now staged into `0. Inbox/Automation Inbox/` via `ops/scripts/capture/review-chat-candidates.py`, with scheduled refresh through QwenPaw cron.
 
 ### Knowledge architecture
 
@@ -183,6 +188,7 @@ Important current lanes include:
 - Automation should write to `0. Inbox/` first.
 - Promotion into `1. Projects/`, `2. Areas/`, `3. Resources/`, or `4. Archive/` is deliberate.
 - Inbox automation is the only sync lane that should be automated by default.
+- The current live `0. Inbox/` is intentionally mixed: canonical intake lanes coexist with older compatibility lanes such as `Link Inbox/`, `YouTube/`, `Idea Notes/`, and broad index files. This is acceptable for now and should be consolidated gradually, not destructively.
 
 ---
 
@@ -205,10 +211,10 @@ Important current lanes include:
 | Priority | Gap | Blocker |
 |----------|-----|---------|
 | 🟡 MED | Clean full vault sync verification | Need one non-overlapping final sync/check |
-| 🟡 MED | QwenPaw memory search end-to-end validation | Embedding server is working, full workflow still needs explicit test |
-| 🟡 MED | Full vault sync verification | Need one non-overlapping final sync/check |
+| 🟡 MED | `rag.orebit.id` reproducible deploy path | Frontend baseline exists; wrapper contract is working, but production host/process-manager path still needs finalization |
 | 🟡 MED | Example typed captures for geology/exploration/offshore/SOP/image requests | Workflow exists, examples still need to be populated |
-| 🟢 LOW | GitHub CLI `gh` authentication | `gh` is installed, but not yet logged in |
+| 🟡 LOW | Inbox lane consolidation | `0. Inbox/` still contains canonical and legacy compatibility lanes side-by-side |
+| 🟡 LOW | API-wrapper data provider cleanup | Canonical wiring is restored, but the large legacy script still deserves cleanup and simplification |
 | 🟢 LOW | ArsariCore PR cron | Disabled by budget choice |
 
 **Completed:**

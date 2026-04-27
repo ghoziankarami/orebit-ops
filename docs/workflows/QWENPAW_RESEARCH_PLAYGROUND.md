@@ -76,6 +76,17 @@ Every important session should leave behind at least one readable note if it con
 Do not keep everything as transcript.
 Keep outputs as curated notes.
 
+Practical rule:
+- brainstorming with reusable insight -> capture
+- strong idea worth revisiting -> capture
+- image concept worth generating later -> capture
+- deck/PPT brief worth producing later -> capture
+- video brief or storyboard direction worth producing later -> capture
+- SOP/workflow that can be reused -> capture
+- decision that changes direction -> capture
+
+For low-confidence automation from saved transcripts, stage candidates in `0. Inbox/Automation Inbox/` first and review them before any promotion.
+
 ## Recommended note types
 
 - Research Brief

@@ -41,6 +41,9 @@ The canonical PARA layout is:
 Automation writes to low-conflict capture surfaces first.
 Humans or deliberate workflows promote material into more durable project, area, or resource notes later.
 
+High-value chat output should not remain only in transcript history.
+If a brainstorming session, strategy answer, decision, image concept, deck brief, video brief, research synthesis, SOP draft, or workflow draft is likely to matter later, capture it into Obsidian the same day.
+
 ## Product-digital operating model
 
 For digital product work, QwenPaw should help produce complete business assets, not just scattered notes.
@@ -253,4 +256,5 @@ The vault should remain structured enough that a future reset still preserves hi
 - `docs/workflows/OBSIDIAN_KNOWLEDGE_ARCHITECTURE.md`
 - `docs/workflows/LEGACY_RESEARCH_BRIDGE.md`
 - `ops/runbooks/PARA_CAPTURE.md`
+- `docs/runbooks/CHAT_AUTOMATION_REVIEW.md`
 - `docs/setup/RCLONE_SETUP.md`

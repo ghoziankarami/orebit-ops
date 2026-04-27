@@ -2,44 +2,85 @@
 
 ## Current truth
 
-`orebit-ops` now contains the canonical local RAG and Obsidian-operating runtime, but it does not yet contain a live Vercel frontend app for `rag.orebit.id`.
+`orebit-ops` now contains both sides of the intended `rag.orebit.id` rebuild surface:
+- the preserved public frontend baseline in `rag-public/`
+- the backend/API wrapper candidate in `rag-system/api-wrapper/`
 
 What is already in place:
 - QwenPaw is the runtime orchestrator
 - local embedding service is active on `3005`
 - local Chroma-based RAG is active in `rag-system/`
-- PDF intake can write draft paper notes into Obsidian
+- the legacy `rag-public/` frontend baseline has been restored and builds successfully
+- the API wrapper contract exists in `rag-system/api-wrapper/`
 - QwenPaw cron is the active scheduler for autosync, backup, vault push, and paper intake
 
 ## Required end state
 
-The target state for `rag.orebit.id` should be:
-- a Vercel-hosted frontend surface
-- backed by Orebit-controlled retrieval logic, not a separate ad-hoc manual stack
+The target state for `rag.orebit.id` is:
+- a Vercel-hosted frontend surface based on the restored `rag-public/` UI
+- backed by an Orebit-controlled API wrapper, not an ad-hoc manual stack
 - operationally documented in this repo
-- restartable by cloning `orebit-ops`, restoring secrets, and redeploying
+- restartable by cloning `orebit-ops`, restoring secrets, starting the wrapper, and redeploying the frontend
 
-## Current gap
+## Current deploy contract
 
-This repo no longer contains the old `rag-public/` frontend because it was removed during cleanup of stale bootstrap surfaces.
-That means `rag.orebit.id` is not yet independently redeployable from the current `main` branch alone.
+### Frontend
 
-## Canonical requirement going forward
+- Path: `rag-public/`
+- Production API path used by browser: `/api/rag`
+- Vercel proxy implementation:
+  - `rag-public/api/_lib/rag-proxy.js`
+  - `rag-public/api/rag/index.js`
+  - `rag-public/api/rag/[...path].js`
+- Server-side env vars expected by the Vercel proxy:
+  - `RAG_API_BASE`
+  - `RAG_API_KEY`
 
-To make `rag.orebit.id` fully independent with QwenPaw and Vercel, the repo must gain:
-- a deployable frontend app directory for Vercel
-- a documented environment-variable contract
-- a documented retrieval/API boundary
-- a runbook for production deploy, rollback, and smoke test
+### Backend wrapper
+
+- Path: `rag-system/api-wrapper/`
+- Default host/port: `127.0.0.1:3004`
+- Main entrypoint: `rag-system/api-wrapper/index.js`
+- Supported endpoints:
+  - `POST /api/rag/search`
+  - `POST /api/rag/query`
+  - `GET /api/rag/browse`
+  - `GET /api/rag/stats`
+  - `POST /api/rag/answer`
+  - `GET /api/rag/health`
+- Auth model:
+  - loopback requests are allowed without API key
+  - non-loopback requests require `X-API-Key` matching `RAG_API_KEY`
+
+## Recommended architecture
+
+### Production shape
+
+1. Deploy `rag-public/` to Vercel
+2. Run `rag-system/api-wrapper/` on an Orebit-controlled host
+3. Put HTTPS in front of the wrapper with a stable public base URL
+4. Set `RAG_API_BASE` in Vercel to that wrapper base URL ending in `/api/rag`
+5. Set `RAG_API_KEY` in both places so the Vercel proxy can call the wrapper securely
+
+### Canonical example
+
+- Frontend: `https://rag.orebit.id`
+- Wrapper base: `https://api.orebit.id/api/rag`
+- Browser flow: browser -> Vercel `/api/rag` -> wrapper -> local data provider
+
+## Remaining gap
+
+The repo now has the right pieces, but the final reproducible production runbook still depends on:
+- choosing the actual Orebit-controlled host/process manager for `rag-system/api-wrapper/`
+- documenting exact environment variables and startup commands for that host
+- adding a smoke-test sequence for deploy and rollback
 
 ## Decision
 
-Treat the current local RAG + QwenPaw + Obsidian system as the canonical backend/runtime foundation.
-Treat the restored legacy `rag-public/` frontend as the required UI baseline for `rag.orebit.id` so the public surface does not lose the old frontend during rebuild.
+Treat the restored `rag-public/` app as the required UI baseline for `rag.orebit.id`.
+Treat `rag-system/api-wrapper/` as the canonical backend boundary to expose local retrieval data safely.
+Do not replace the old UI during redeploy unless there is an explicit product decision to do so.
 
-## Near-term recommendation
+## Next step
 
-1. Keep local RAG and Obsidian workflows canonical in `orebit-ops`
-2. Use the restored `rag-public/` app as the frontend baseline instead of inventing a new UI
-3. Point that frontend at a documented Orebit-controlled retrieval endpoint
-4. Document deploy and smoke test inside this repo
+Use `docs/runbooks/RAG_OREBIT_ID_DEPLOY.md` as the operational runbook for finishing this deploy path.
