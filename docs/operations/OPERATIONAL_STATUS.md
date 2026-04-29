@@ -1,10 +1,22 @@
 # Orebit Operational Status
 
-> **Last verified:** 2026-04-26 — Source: live runtime, repo audit, and active config review
+> **Last verified:** 2026-04-29 — Source: live runtime, repo audit, and active config review
 > **Canonical:** This is the single source of truth for Orebit runtime state.
 > Reset by: clone repo -> read this file -> run setup.
 >
 > **Primary stack:** QwenPaw + local-first RAG + Obsidian PARA + optional Google Drive inbox sync
+
+---
+
+## 🚀 rag.orebit.id Deployment Status
+
+| Target | Status | Notes |
+|--------|--------|-------|
+| Local QwenPaw | ⚠️ Not possible | Container has no public IP |
+| Railway | ✅ Ready | Dockerfile + config prepared |
+| Domain | ⏳ Pending | Need to update DNS after Railway deploy |
+
+**Deployment Guide:** See `docs/operations/RAG_RAILWAY_DEPLOYMENT.md`
 
 ---
 

@@ -34,9 +34,11 @@ Last updated: 2026-04-26
 - [ ] Complete one clean full-vault sync verification against Google Drive
 - [ ] Continue local vault curation for research, fleeting notes, and legacy knowledge promotion
 - [ ] Add concrete example notes that exercise the new QwenPaw research-playground templates
-- [ ] Wire `rag.orebit.id` to a reproducible Orebit-controlled backend/API deployment path using `rag-public/` and `rag-system/api-wrapper/`
+- [x] ~~Wire `rag.orebit.id` to a reproducible Orebit-controlled backend/API deployment path using `rag-public/` and `rag-system/api-wrapper/`~~ → Done 2026-04-29: Railway deployment prepared
 - [ ] Simplify and clean up `rag-system/api-wrapper/rag_public_data.py` now that canonical local corpus wiring has been restored
 - [ ] Update canonical docs and runbooks to reflect the new knowledge architecture and capture workflow
+- [ ] Deploy rag.orebit.id to Railway (user action required: see RAG_RAILWAY_DEPLOYMENT.md)
+- [ ] Update DNS for rag.orebit.id to point to Railway after deployment
 
 ---
 
