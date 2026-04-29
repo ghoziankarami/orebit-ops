@@ -42,9 +42,9 @@ Last updated: 2026-04-26
 
 ## Blocked / Deferred
 
-- [ ] rclone write access through service account is blocked by Google Drive quota rules
-- [ ] OAuth-based rclone write setup is deferred until user wants to resume it
-- [ ] Full bidirectional vault sync should not be enabled until write path is trusted
+- [x] ~~rclone write access through service account is blocked by Google Drive quota rules~~ → Fixed 2026-04-29: OAuth write confirmed working
+- [x] ~~OAuth-based rclone write setup is deferred until user wants to resume it~~ → Fixed 2026-04-29: gdrive-obsidian-oauth tested working (write+read+delete)
+- [ ] Full bidirectional vault sync - can be enabled now that write path is trusted
 
 ---
 
