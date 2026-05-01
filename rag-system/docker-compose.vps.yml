@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # RAG API Wrapper
+  api-wrapper:
+    build:
+      context: ./api-wrapper
+      dockerfile: Dockerfile
+    container_name: rag-api-wrapper
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - RAG_API_HOST=0.0.0.0
+      - OREBIT_EMBEDDING_API_URL=http://embedding-server:8000/v1/embeddings
+      - RAG_API_KEY=${RAG_API_KEY:-orebit-rag-2026-secret-key-change-me}
+      - RAG_STATS_TTL_MS=60000
+      - RAG_RESPONSE_CACHE_TTL_MS=300000
+    depends_on:
+      - embedding-server
+      - chromadb
+    restart: unless-stopped
+    networks:
+      - rag-network
+    volumes:
+      - ./api-wrapper:/app
+      - api-node-modules:/app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/api/rag/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Embedding Server
+  embedding-server:
+    build:
+      context: ./embedding-server
+      dockerfile: Dockerfile
+    container_name: rag-embedding-server
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_NAME=all-MiniLM-L6-v2
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MAX_BATCH_SIZE=32
+    restart: unless-stopped
+    networks:
+      - rag-network
+    volumes:
+      - ./embedding-server:/app
+      - models-cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # ChromaDB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: rag-chromadb
+    ports:
+      - "8001:8000"
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_PORT=8000
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=chromadb.auth.token.TokenAuthServerProvider
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_AUTH_TOKEN:-orebit-chroma-secret}
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=chromadb.auth.token.TokenAuthServerProvider
+    restart: unless-stopped
+    networks:
+      - rag-network
+    volumes:
+      - chroma-data:/chroma/chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  chroma-data:
+    driver: local
+  api-node-modules:
+    driver: local
+  models-cache:
+    driver: local
