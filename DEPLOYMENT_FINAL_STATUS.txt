@@ -1,0 +1,45 @@
+﻿rag.orebit.id DEPLOYMENT: COMPLETE
+
+Date: 2026-05-02
+Status: Production ready (with quick tunnel limitation)
+
+Architecture:
+  User -> https://rag.orebit.id -> Nginx (VPS) -> Cloudflare Tunnel -> QwenPaw (ChromaDB)
+
+Configuration:
+  Domain:       https://rag.orebit.id
+  Tunnel URL:   https://opposite-fountain-corrected-organized.trycloudflare.com
+  VPS IP:       43.157.201.50
+  QwenPaw IP:   103.139.244.177 (internal only)
+
+Components Status:
+  SSL Certificate: Active (Let's Encrypt)
+  Nginx Proxy: Configured and running
+  Cloudflare Tunnel: Active
+  QwenPaw API: Healthy (351 indexed papers)
+  Health Check: https://rag.orebit.id/api/rag/health
+
+Access Points:
+  RAG UI:         https://rag.orebit.id
+  Health Check:   https://rag.orebit.id/api/rag/health
+  API Endpoint:   https://rag.orebit.id/api/rag/query
+
+Performance:
+  Indexed Papers: 351
+  Summary Count:  343
+  Collections:    93
+  API Response:   < 200ms
+
+Notes:
+  - Using Cloudflare quick tunnel (URL may change on restart)
+  - For production persistence: create named tunnel with Cloudflare account
+  - VPS acts as frontend-only (Nginx proxy + SSL)
+  - All RAG processing happens on QwenPaw (central system)
+
+Next Steps:
+  1. Setup auto-restart for cloudflared (bash setup-cloudflared-tunnel.sh)
+  2. Add monitoring and health checks
+  3. Create persistent named tunnel (optional)
+  4. Archive obsolete deployment files
+
+Repository: https://github.com/ghoziankarami/orebit-ops
