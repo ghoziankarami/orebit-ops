@@ -4,10 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **System** | Orebit RAG System (rag.orebit.id) |
+| **System** | Orebit RAG System (rag.orebit.id, api.orebit.id) |
 | **Document Owner** | Orebit Operations Team |
-| **Version** | 1.0 |
-| **Last Updated** | 2026-05-02 |
+| **Version** | 2.0 |
+| **Last Updated** | 2026-05-03 |
 | **Status** | Production |
 | **Purpose** | Operations and maintenance procedures |
 
@@ -16,8 +16,8 @@
 ## 🎯 Scope
 
 This SOP covers:
-- System architecture and components
-- Deployment procedures
+- System architecture and components (Full Stack React UI + API)
+- Deployment procedures (VPS-only, no Vercel)
 - Monitoring and health checks
 - Troubleshooting procedures
 - Emergency response protocols
@@ -40,21 +40,23 @@ This SOP covers:
 ┌──────────────────────────────────────────────────────────┐
 │ VPS (43.157.201.50) - Frontend                          │
 │ ┌──────────────────────────────────────────────────────┐ │
-│ │ Nginx - Reverse Proxy                               │ │
-│ │ - SSL Termination (Lets Encrypt)                    │ │
-│ │ - Domain: rag.orebit.id                             │ │
-│ │ - Landing Page                                       │ │
-│ │ - API Endpoints Proxy                                │ │
+│ │ Nginx - Reverse Proxy + Static File Server          │ │
+│ │ - SSL Termination (Let's Encrypt)                   │ │
+│ │ - Domain 1: rag.orebit.id (React UI + API)          │ │
+│ │ - Domain 2: api.orebit.id (API only)               │ │
+│ │ - Location /: React UI files                        │ │
+│ │ - Location /api/rag/*: Proxy to Cloudflare          │ │
 │ └──────────────────────────────────────────────────────┘ │
 └───────────────────┬──────────────────────────────────────┘
                     │
-                    │ Proxy Request
+                    │ Proxy Request (API only)
                     ▼
 ┌──────────────────────────────────────────────────────────┐
 │ Cloudflare Tunnel                                       │
 │ ┌──────────────────────────────────────────────────────┐ │
 │ │ - Encrypted Tunneling (HTTP/QUIC)                   │ │
-│ │ - URL: *.trycloudflare.com                          │ │
+│ │ - URL: venture-stud-gale-fuji.trycloudflare.com    │ │
+│ │ - Target: http://127.0.0.1:3004                    │ │
 │ │ - Auto-restart enabled                              │ │
 │ └──────────────────────────────────────────────────────┘ │
 └───────────────────┬──────────────────────────────────────┘
@@ -62,11 +64,11 @@ This SOP covers:
                     │ Private Connection
                     ▼
 ┌──────────────────────────────────────────────────────────┐
-│ QwenPaw (103.139.244.177) - Backend                     │
+│ QwenPaw (Private IP) - Backend                          │
 │ ┌──────────────────────────────────────────────────────┐ │
-│ │ RAG API Wrapper (Port 3004)                         │ │
+│ │ RAG API Wrapper (Node.js, Port 3004, 0.0.0.0)       │ │
 │ │ - Query Processing                                  │ │
-│ │ - 9router LLM Integration                           │ │
+│ │ - API Key Authentication                            │ │
 │ │ - Vector Search                                     │ │
 │ └──────────────────────────────────────────────────────┘ │
 │ ┌──────────────────────────────────────────────────────┐ │
@@ -82,9 +84,9 @@ This SOP covers:
 
 | Component | Location | Role | Criticality |
 |-----------|----------|------|---------------|
-| **VPS / Nginx** | 43.157.201.50 | Frontend proxy, SSL termination | HIGH |
+| **VPS / Nginx** | 43.157.201.50 | React UI + Proxy + SSL | HIGH |
 | **Cloudflare Tunnel** | QwenPaw → Cloudflare | Encrypted transportation | HIGH |
-| **QwenPaw API** | 103.139.244.177:3004 | RAG processing | CRITICAL |
+| **QwenPaw API** | Private:3004 | RAG processing | CRITICAL |
 | **ChromaDB** | QwenPaw internal | Vector storage | CRITICAL |
 
 ---
@@ -93,10 +95,12 @@ This SOP covers:
 
 ### Daily Health Checks
 
-#### 1. System Uptime Check
+#### 1. System Uptime Check (Public)
+
+On any machine:
 ```bash
-# On VPS
-curl -s https://rag.orebit.id/api/rag/health | python3 -m json.tool
+# Check API via api.orebit.id
+curl -s https://api.orebit.id/api/rag/health | python3 -m json.tool
 ```
 
 **Expected Output:**
@@ -116,52 +120,64 @@ curl -s https://rag.orebit.id/api/rag/health | python3 -m json.tool
 - ❌ indexed_papers < 350
 - ❌ HTTP response != 200
 
-#### 2. Process Status Check
+#### 2. UI Health Check
+
+```bash
+# Check React UI loads
+curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" https://rag.orebit.id/
+```
+
+**Expected:** HTTP Status: 200
+
+#### 3. Process Status Check
 
 **On VPS:**
 ```bash
 sudo systemctl status nginx | grep "Active"
+curl https://api.orebit.id/api/rag/health
 ```
 
 **On QwenPaw:**
 ```bash
+# Check API wrapper
+ps aux | grep "node.*index.js" | grep -v grep
+
+# Check Cloudflare tunnel
 ps aux | grep cloudflared | grep -v grep
-ps aux | grep "node.*3004" | grep -v grep
+
+# Check local API
+curl http://127.0.0.1:3004/api/rag/health
 ```
 
-**Expected:** Both processes running with active status.
+**Expected:** All processes running with healthy status.
 
-#### 3. SSL Certificate Check
+#### 4. SSL Certificate Check
 ```bash
-# Check certificate expiry
+# Check certificate expiry for both domains
 echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -servername api.orebit.id -connect api.orebit.id:443 2>/dev/null | openssl x509 -noout -dates
 ```
 
 **Action Required:** Renew if expiry < 30 days.
 
-#### 4. Log File Review
+#### 5. Log File Review
 
 **VPS Nginx Logs:**
 ```bash
 # Error logs
-sudo tail -50 /var/log/nginx/error.log | grep -E "error|ERROR|crit|CRIT"
+sudo tail -50 /var/log/nginx/rag-orebit-id-error.log
 
 # Access logs (recent requests)
-sudo tail -50 /var/log/nginx/access.log
+sudo tail -50 /var/log/nginx/rag-orebit-id-access.log
 ```
 
-**QwenPaw Tunnel Logs:**
+**QwenPaw Logs:**
 ```bash
 # Cloudflared logs
-tail -50 /tmp/cloudflared-tunnel.log
+tail -f /tmp/cloudflared-tunnel-*.log
 
-# Wrapper logs
-tail -50 /tmp/cloudflared-wrapper.log
-```
-
-**Auto-Restart Logs:**
-```bash
-cat /tmp/cloudflared-restart.log
+# API wrapper logs
+tail -f /tmp/rag-api-wrapper.log
 ```
 
 ### Automated Monitoring
@@ -188,17 +204,20 @@ crontab -l
 **Symptoms:**
 - Browser shows 502 Bad Gateway
 - curl returns 502 status
+- UI loads but API calls fail
 
 **Troubleshooting Steps:**
 
 1. **Check Nginx Status (VPS)**
    ```bash
    sudo systemctl status nginx
+   curl https://rag.orebit.id/  # Should work (UI)
+   curl https://api.orebit.id/api/rag/health  # Should fail with 502
    ```
 
-2. **Check Nginx Error Logs**
+2. **Check Nginx Error Logs (VPS)**
    ```bash
-   sudo tail -50 /var/log/nginx/error.log
+   sudo tail -50 /var/log/nginx/rag-orebit-id-error.log
    ```
 
 3. **Check Cloudflare Tunnel (QwenPaw)**
@@ -208,122 +227,131 @@ crontab -l
 
 4. **Test Tunnel Directly**
    ```bash
-   curl https://opposite-fountain-corrected-organized.trycloudflare.com/api/rag/health
+   curl https://venture-stud-gale-fuji.trycloudflare.com/api/rag/health
    ```
 
 5. **If tunnel down:**
    ```bash
-   pkill -f "cloudflared"
+   # On QwenPaw
+   pkill -f cloudflared
    sleep 2
-   nohup bash /app/working/workspaces/default/orebit-ops/cloudflared-wrapper.sh > /dev/null 2>&1 &
-   ps aux | grep cloudflared | grep -v grep
+   nohup cloudflared tunnel --url http://127.0.0.1:3004 > /tmp/cloudflared-tunnel-$(date +%Y%m%d-%H%M%S).log 2>&1 &
+
+   # Get new tunnel URL
+   tail -50 /tmp/cloudflared-tunnel-*.log | grep -oP 'https://[^ ]+\.trycloudflare\.com' | tail -1
+
+   # Update VPS Nginx with new URL
+   # See vps-update-tunnel-url.sh script
    ```
 
-### Issue: 404 on Root Domain
+6. **If API wrapper down:**
+   ```bash
+   # On QwenPaw
+   cd /app/working/workspaces/default/orebit-ops/rag-system/api-wrapper
+   bash start-wrapper.sh
+
+   # Verify
+   curl http://127.0.0.1:3004/api/rag/health
+   ```
+
+### Issue: 404 on UI
 
 **Symptoms:**
-- https://rag.orebit.id/ returns 404
+- https://rag.orebit.id/ returns 404 or shows blank page
 - API endpoints still work
 
-**Root Cause:** Landing page file missing or Nginx misconfigured.
+**Root Cause:** UI files missing or Nginx misconfigured.
 
 **Resolution:**
 
-1. **Check Landing Page File**
+1. **Check UI Files**
    ```bash
-   ls -la /var/www/rag.orebit.id/index.html
+   # On VPS
+   ls -la /var/www/rag-ui/index.html
    ```
 
 2. **Check Nginx Configuration**
    ```bash
-   grep -A 5 "location = /" /etc/nginx/sites-enabled/rag-orebit-id
+   # On VPS
+   grep -A 5 "location / {" /etc/nginx/sites-enabled/rag-orebit-id
    ```
 
-3. **If misconfigured, run:**
+3. **If misconfigured, redeploy UI:**
    ```bash
-   cd /app/working/workspaces/default/orebit-ops
-   bash setup-landing-page.sh
+   # Clone or pull latest from GitHub
+   cd /root
+   git clone https://github.com/ghoziankarami/orebit-ops.git /root/orebit-ops
+
+   # Deploy UI
+   bash /root/orebit-ops/vps-deploy-rag.sh
    ```
 
-### Issue: API Returns Connection Refused
+### Issue: API Returns 401 Unauthorized
 
 **Symptoms:**
-- curl http://127.0.0.1:3004/api/rag/health fails
-- API wrapper not responding
+- curl returns 401 status
+- API endpoints not responding
+
+**Root Cause:** API key missing or incorrect.
 
 **Resolution:**
 
-1. **Check API Process**
+1. **Check API Request Headers**
    ```bash
-   ps aux | grep "node.*3004" | grep -v grep
+   # Should include: x-api-key: orebit-rag-api-key-2026-03-26-temp
+   curl -H "x-api-key: orebit-rag-api-key-2026-03-26-temp" \
+     https://api.orebit.id/api/rag/stats
    ```
 
-2. **Check API Logs**
+2. **Check API Wrapper Config (QwenPaw)**
    ```bash
-   # API logs location - varies by setup
-   # Check process output or application logs
+   cat /app/working/workspaces/default/orebit-ops/rag-system/api-wrapper/.env
    ```
+   Should contain: `RAG_API_KEY=orebit-rag-api-key-2026-03-26-temp`
 
-3. **Restart API Wrapper**
-   ```bash
-   # Locate restart script or process
-   # This depends on your specific API setup
-   ```
+3. **Note:** Health endpoint (`/api/rag/health`) doesn't require API key.
 
-### Issue: Indexed Papers Count Drop
+### Issue: Tunnel URL Changed (NXDOMAIN)
 
 **Symptoms:**
-- Health check shows indexed_papers < 351
-- Sudden decrease in corpus size
+- API returns 502 Bad Gateway
+- Nginx shows "cannot resolve host" errors
+- Previous tunnel URL not responding
 
-**Possible Causes:**
-- ChromaDB corruption
-- Vector index rebuild
-- Data synchronization issue
+**Root Cause:** Cloudflare quick tunnel URLs change on restart.
 
 **Resolution:**
 
-1. **Check ChromaDB Status**
+1. **Identify Old URL in Nginx Config**
    ```bash
-   # Check ChromaDB process and logs
+   # On VPS
+   grep "trycloudflare.com" /etc/nginx/sites-enabled/rag-orebit-id
    ```
 
-2. **Verify Vector Database**
+2. **Get New Tunnel URL (QwenPaw)**
    ```bash
-   # Check ChromaDB data directory
-   ls -la /path/to/chromadb/
+   tail -50 /tmp/cloudflared-tunnel-*.log | grep -oP 'https://[^ ]+\.trycloudflare\.com' | tail -1
    ```
 
-3. **If data loss suspected:**
-   - Check recent changes
-   - Review logs for errors
-   - Consider data restoration if backup available
+3. **Update VPS Nginx**
+   ```bash
+   # On VPS
+   # Option 1: Use update script
+   bash /app/working/workspaces/default/orebit-ops/vps-update-tunnel-url.sh
 
-### Issue: Slow API Response Time
+   # Option 2: Manual update
+   sudo sed -i 's|OLD_URL|NEW_URL|g' /etc/nginx/sites-enabled/rag-orebit-id
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
 
-**Symptoms:**
-- API response > 500ms
-- Queries take long time to complete
-
-**Resolution:**
-
-1. **Check System Resources**
+4. **For Permanent URL, Create Named Tunnel**
    ```bash
    # On QwenPaw
-   top  # Check CPU, memory usage
-   df -h  # Check disk space
+   cloudflared tunnel login
+   cloudflared tunnel create qwenpaw-rag
+   # This will provide a stable URL
    ```
-
-2. **Check ChromaDB Performance**
-   ```bash
-   # Check vector search performance
-   # May need index optimization
-   ```
-
-3. **Review Recent Changes**
-   - New papers indexed?
-   - Large queries?
-   - System load increased?
 
 ---
 
@@ -335,54 +363,55 @@ crontab -l
 
 **Immediate Actions:**
 
-1. **Confirm Outage**
+1. **Confirm Outage Scope**
    ```bash
+   # Test from external machine
    curl https://rag.orebit.id/api/rag/health
-   # Check if returning timeout/connection error
    ```
 
 2. **Check VPS Status**
-   - Can SSH to VPS? `ssh ubuntu@43.157.201.50`
-   - Check: `sudo systemctl status nginx`
+   ```bash
+   # Can SSH to VPS?
+   ssh root@43.157.201.50
+
+   # Check Nginx
+   sudo systemctl status nginx
+   ```
 
 3. **Check QwenPaw Status**
-   - Can access QwenPaw?
-   - Check: `ps aux | grep cloudflared`
-   - Check: `curl http://127.0.0.1:3004/api/rag/health`
+   ```bash
+   # From QwenPaw
+   ps aux | grep cloudflared
+   ps aux | grep "node.*3004"
+   curl http://127.0.0.1:3004/api/rag/health
+   ```
 
-4. **Restart Components**
-   - If VPS issue: `sudo systemctl restart nginx`
-   - If QwenPaw issue: Restart cloudflared tunnel
+4. **Restart Components as Needed**
+   - **VPS:** `sudo systemctl restart nginx`
+   - **QwenPaw Tunnel:** `pkill -f cloudflared && start tunnel`
+   - **QwenPaw API:** Restart wrapper script
 
 5. **Verify Recovery**
    ```bash
-   curl https://rag.orebit.id/api/rag/health
-   # Should return healthy status
+   # From any machine
+   curl https://api.orebit.id/api/rag/health
+   open https://rag.orebit.id
    ```
 
-### Data Integrity Concern
+### UI Works, API Fails
 
-**Situation:** Indexed papers count mismatch or data loss
+**Situation:** React UI loads but API calls return errors
 
-**Actions:**
+**Diagnosis:**
+- UI: https://rag.orebit.id → OK
+- API: https://api.orebit.id/api/rag/health → FAIL
 
-1. **Stop All Operations**
-   - Stop indexing/intake processes
-   - Stop write operations to database
+**Possible Causes:**
+1. Cloudflare tunnel down → Check QwenPaw tunnel
+2. API wrapper stopped → Check QwenPaw API process
+3. Tunnel URL changed → Update VPS Nginx config
 
-2. **Verify Data State**
-   - Check ChromaDB integrity
-   - Compare with backups (if available)
-   - Review logs to identify issue
-
-3. **Restore Data (if needed)**
-   - From recent backup
-   - Re-index from source documents
-
-4. **Prevent Recurrence**
-   - Identify root cause
-   - Implement additional safeguards
-   - Update procedures
+**Resolution:** Follow troubleshooting steps in Issue: 502 Bad Gateway.
 
 ---
 
@@ -391,22 +420,22 @@ crontab -l
 ### Regular Maintenance Schedule
 
 #### Daily:
-- [ ] Check system health: `curl https://rag.orebit.id/api/rag/health`
+- [ ] Check system health: `curl https://api.orebit.id/api/rag/health`
+- [ ] Verify UI loads: `curl https://rag.orebit.id/`
 - [ ] Review error logs for anomalies
-- [ ] Verify auto-restart logs
+- [ ] Check tunnel process status
 
 #### Weekly:
-- [ ] Full log review
+- [ ] Full log review (Nginx + cloudflared)
 - [ ] Performance metrics analysis
-- [ ] Check SSL certificate expiry
+- [ ] Check SSL certificate expiry (both domains)
 - [ ] Verify system resources (CPU, memory, disk)
 
 #### Monthly:
-- [ ] Backup ChromaDB data
+- [ ] Update system packages (VPS + QwenPaw)
 - [ ] Review security logs
-- [ ] Update system packages
-- [ ] Optimize database indices (if needed)
-- [ ] Document any incidents
+- [ ] Check ChromaDB data integrity
+- [ ] Document any incidents or changes
 
 ### SSL Certificate Renewal
 
@@ -415,10 +444,16 @@ crontab -l
 ```bash
 # On VPS
 sudo certbot renew
+
+# Check status
+sudo certbot certificates
+
+# Reload Nginx
 sudo systemctl reload nginx
 
 # Verify
 echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -servername api.orebit.id -connect api.orebit.id:443 2>/dev/null | openssl x509 -noout -dates
 ```
 
 ---
@@ -430,14 +465,14 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 1. **Submit Change Request**
    - Document proposed change
    - Identify risk level (LOW/MEDIUM/HIGH/CRITICAL)
-   - Estimate impact
+   - Estimate impact and downtime
 
 2. **Review and Approve**
    - Operations lead reviews
    - Technical validation
    - Risk assessment
 
-3. **Test in Non-Production**
+3. **Test in Non-Production** (if available)
    - Apply change to test environment
    - Verify system functionality
    - Rollback plan if test fails
@@ -455,10 +490,10 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 ### Example Change Record Format:
 
 ```markdown
-## Change Request #001
+## Change Request #YYYY-MM-DD-###
 
 **Date:** YYYY-MM-DD
-**Component:** [Component Name]
+**Component:** [VPS/Nginx/QwenPaw/Tunnel/UI/API]
 **Risk Level:** [LOW/MEDIUM/HIGH/CRITICAL]
 **Requested By:** [Name]
 
@@ -475,7 +510,8 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 [How to revert if needed]
 
 **Impact Assessment:**
-- Downtime expected/hours: [X]
+- Downtime expected: [X minutes/hours]
+- Affected components: [UI/API/Both]
 - Affected users: [All/Specific group]
 - Risk mitigation: [List]
 
@@ -493,35 +529,46 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 ### Security Best Practices
 
 1. **Never expose internal IP**
-   - QwenPaw IP 103.139.244.177 must remain internal
+   - QwenPaw must remain private (no public IP)
    - Never open public ports to QwenPaw
+   - Only expose via Cloudflare tunnel
 
 2. **Monitor unusual traffic**
    - Review access logs regularly
    - Look for anomaly patterns
    - Implement rate limiting if needed
+   - Monitor API key usage
 
 3. **Keep systems updated**
    - Security patches applied promptly
    - Dependencies kept current
    - SSL certificates renewed before expiry
+   - Cloudflared updated regularly
 
 ### Operational Best Practices
 
 1. **Document all changes**
-   - Every change should be tracked
-   - Use git for configuration changes
-   - Maintain accurate logs
+   - Every change tracked in git
+   - Commit messages descriptive
+   - Rollback plans documented
 
 2. **Test before deploying**
-   - Never deploy untested changes to production
+   - Never deploy untested changes
+   - Verify API endpoints work
+   - Check UI functionality
    - Have rollback plan ready
-   - Monitor for issues after deployment
 
 3. **Monitor proactively**
    - Don't wait for failures
    - Set up alerting if possible
    - Regular health checks
+   - Review logs daily
+
+4. **Tunnel URL Management**
+   - Quick tunnel URLs can change
+   - Update VPS Nginx when URL changes
+   - Consider named tunnel for stability
+   - Keep both old and new URL for gradual transition
 
 ---
 
@@ -532,15 +579,17 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 | Severity | Response Time | Notification | Example Issue |
 |----------|---------------|--------------|---------------|
 | **P1** | < 15 minutes | All hands on deck | Complete system outage |
-| **P2** | < 1 hour | Operations team | API unavailable |
-| **P3** | < 4 hours | On-call engineer | Performance degradation |
-| **P4** | < 24 hours | Operations team | Minor UI issue |
-| **P5** | Next sprint | Development team | Feature request |
+| **P2** | < 1 hour | Operations team | API unavailable (502/503) |
+| **P3** | < 4 hours | On-call engineer | UI issues, slow performance |
+| **P4** | < 24 hours | Operations team | Minor configuration issue |
+| **P5** | Next sprint | Development team | Feature request or enhancement |
 
 ### Emergency Contacts
 
 **When to Escalate:**
 - System down > 15 minutes (P1)
+- API unavailable > 1 hour (P2)
+- Tunnel URL change causes outage (P2)
 - Data integrity concern
 - Security breach suspected
 - Unrecoverable error
@@ -556,15 +605,15 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 ## 📚 Related Documents
 
 ### Critical Documentation
-- `README.md` - System overview
-- `DEPLOYMENT_FINAL_STATUS.txt` - Current deployment status
-- `CLOUDFLARED_AUTORESTART_COMPLETE.md` - Auto-restart details
-- `ARCHITECTURE_QUICK_REF.md` - Architecture reference
+- **README.md** - System overview and canonical documentation
+- **DEPLOYMENT.md** - Deployment procedures
+- **vps-deploy-rag.sh** - VPS deployment script
+- **vps-update-tunnel-url.sh** - Tunnel URL update script
 
-### Historical Documentation
-- `CORRECT_ARCHITECTURE_DEPLOYMENT.md` - Architecture decisions
-- `SYSTEM_ARCHITECTURE_ANALYSIS.md` - Technical analysis
-- `VPS_DEPLOYMENT_GUIDE.md` - VPS deployment details
+### Reference Documentation
+- **VERCEL_VS_VPS_DECISION.md** - Why VPS deployment was chosen
+- **ARCHITECTURE_QUICK_REF.md** - Architecture quick reference
+- **NEW_TUNNEL_URL_ACTIVE.md** - Current tunnel URL information
 
 ### GitHub Repository
 - https://github.com/ghoziankarami/orebit-ops
@@ -591,11 +640,12 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 ## 🎓 Training Requirements
 
 ### Required Training
-- System architecture overview
-- Monitoring procedures
-- Troubleshooting common issues
+- Full stack architecture overview (VPS + QwenPaw + React UI)
+- Monitoring procedures for UI and API
+- Troubleshooting common issues (tunnel, API, UI)
 - Emergency response protocols
 - Change management process
+- Tunnel URL update procedures
 
 ### Training Materials
 - This SOP document
@@ -610,32 +660,74 @@ echo | openssl s_client -servername rag.orebit.id -connect rag.orebit.id:443 2>/
 ### Appendix A: Quick Reference Commands
 
 ```bash
-# VPS Commands (43.157.201.50)
-curl https://rag.orebit.id/api/rag/health
-sudo systemctl status nginx
-sudo tail -f /var/log/nginx/error.log
+# Public Commands (from any machine)
+curl https://api.orebit.id/api/rag/health
+open https://rag.orebit.id
 
-# QwenPaw Commands (103.139.244.177)
+# VPS Commands (43.157.201.50)
+ssh root@43.157.201.50
+sudo systemctl status nginx
+sudo tail -f /var/log/nginx/rag-orebit-id-error.log
+curl https://api.orebit.id/api/rag/health
+
+# QwenPaw Commands (private IP only)
 ps aux | grep cloudflared | grep -v grep
+ps aux | grep "node.*3004" | grep -v grep
 curl http://127.0.0.1:3004/api/rag/health
-crontab -l
-tail -f /tmp/cloudflared-wrapper.log
+tail -f /tmp/cloudflared-tunnel-*.log
+
+# Deployment Commands
+# On VPS:
+git clone https://github.com/ghoziankarami/orebit-ops.git /root/orebit-ops
+bash /root/orebit-ops/vps-deploy-rag.sh
+bash /root/orebit-ops/vps-update-tunnel-url.sh NEW_URL
 ```
 
 ### Appendix B: System Status Checklist
 
 ```
-□ Landing page loads (HTTP 200)
-□ Health check returns (indexed_papers: 351)
-□ SSL certificate valid
+□ React UI loads (https://rag.orebit.id) - HTTP 200
+□ API health check returns (indexed_papers: 351)
+□ API stats endpoint works (needs API key)
+□ SSL certificates valid (both domains)
 □ TLS 1.2/1.3 enabled
 □ API response time < 200ms
-□ Tunnel process running
-□ API wrapper process running
+□ Tunnel process running on QwenPaw
+□ API wrapper process running on QwenPaw (port 3004)
 □ Nginx running on VPS
-□ Cron jobs active on QwenPaw
-□ No errors in logs
+□ UI files present in /var/www/rag-ui
+□ No errors in Nginx logs
+□ No errors in cloudflared logs
+□ Tunnel URL matches current active URL
 ```
+
+### Appendix C: Tunnel URL Update Procedure
+
+When Cloudflare tunnel URL changes:
+
+1. **Get New Tunnel URL (QwenPaw)**
+   ```bash
+   tail -50 /tmp/cloudflared-tunnel-*.log | grep -oP 'https://[^ ]+\.trycloudflare\.com' | tail -1
+   ```
+
+2. **Update VPS Nginx**
+   ```bash
+   # Option 1: Automated
+   bash /root/orebit-ops/vps-update-tunnel-url.sh
+
+   # Option 2: Manual
+   sudo nano /etc/nginx/sites-enabled/rag-orebit-id
+   # Replace old URL with new URL in proxy_pass and Host header
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+3. **Verify**
+   ```bash
+   curl https://api.orebit.id/api/rag/health
+   ```
+
+**Current Active Tunnel URL:** `venture-stud-gale-fuji.trycloudflare.com`
 
 ---
 
@@ -643,7 +735,7 @@ tail -f /tmp/cloudflared-wrapper.log
 
 **Document Control:**
 - **Owner:** Orebit Operations Team
-- **Next Review:** 2026-08-02 (Quarterly)
-- **Last Updated:** 2026-05-02
+- **Next Review:** 2026-08-03 (Quarterly)
+- **Last Updated:** 2026-05-03
 
 **For issues, questions, or updates, contact the operations team or update via pull request.**

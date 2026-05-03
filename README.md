@@ -6,9 +6,9 @@
 
 The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operational at `https://rag.orebit.id`, providing production-ready AI-powered research capabilities with 351 indexed research papers.
 
-**Deployment Date:** 2026-05-02
+**Deployment Date:** 2026-05-03
 **Version:** 2.0.0
-**Architecture:** Frontend-Backend Separation (VPS + QwenPaw)
+**Architecture:** Full Stack (VPS-Nginx + QwenPaw-Backend)
 
 ---
 
@@ -26,26 +26,28 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 ┌─────────────────────────────────────────────────────────────┐
 │  VPS (43.157.201.50)                                      │
 │  - Nginx Proxy Server                                      │
-│  - SSL/TLS Encryption (Let's Encrypt)                       │
-│  - Landing Page                                            │
-│  - Public Domain: rag.orebit.id                            │
+│  - SSL/TLS Encryption (Let's Encrypt)                      │
+│  - React UI (rag.orebit.id)                                │
+│  - API Proxy (api.orebit.id)                              │
+│  - Public Domain: rag.orebit.id, api.orebit.id             │
 └──────────────────────────────┬──────────────────────────────┘
                                │
-                               │ Proxy
+                               │ Proxy (API calls only)
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Cloudflare Tunnel                                         │
 │  - Encrypted Tunneling                                      │
-│  - URL: opposite-fountain-corrected-organized.trycloudflare.com │
+│  - URL: venture-stud-gale-fuji.trycloudflare.com          │
+│  - Status: Active with auto-restart                        │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                │ HTTP/QUIC
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  QwenPaw (103.139.244.177 - Internal)                      │
-│  - RAG API Wrapper (Port 3004)                              │
+│  QwenPaw (Private IP Only)                                 │
+│  - RAG API Wrapper (Port 3004, bind: 0.0.0.0)              │
 │  - ChromaDB Vector Database                                 │
-│  - 9router + LLM Integration                               │
+│  - API Key Authentication                                   │
 │  - Central RAG Processing                                   │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -54,8 +56,8 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 ┌─────────────────────────────────────────────────────────────┐
 │  ChromaDB Vector Database                                   │
 │  - 351 Indexed Research Papers                              │
-│  - 343 Summaries                                           │
-│  - 93 Collections                                          │
+│  - 343 Auto-Generated Summaries                            │
+│  - 93 Organized Collections                                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -63,9 +65,9 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 
 | Component | Role | Technology |
 |-----------|------|------------|
-| **VPS** | Frontend-only, SSL termination | Nginx, Let's Encrypt |
-| **Cloudflare Tunnel** | Secure tunneling | cloudflared, HTTP/QUIC |
-| **QwenPaw** | Backend, RAG processing | Node.js, Python, ChromaDB |
+| **VPS** | React UI + API Proxy + SSL | Nginx, Let's Encrypt |
+| **Cloudflare Tunnel** | Secure backend tunneling | cloudflared, HTTP/QUIC |
+| **QwenPaw** | RAG processing + API Wrapper | Node.js, Python, ChromaDB |
 | **ChromaDB** | Vector storage | ChromaDB |
 
 ---
@@ -73,20 +75,22 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 ## 🚀 Key Features
 
 ### Production-Ready Features
-- ✅ Public domain with SSL/TLS encryption (Lets Encrypt)
-- ✅ Professional landing page with live statistics
-- ✅ Auto-restart capability for tunnel service
-- ✅ Comprehensive monitoring and logging
-- ✅ Dual-layer health checks (immediate + periodic)
-- ✅ Zero-downtime architecture
-- ✅ Load-ready and scalable
+- ✅ **Full Stack React UI** at rag.orebit.id
+- ✅ **Dual-domain setup** (rag.orebit.id + api.orebit.id)
+- ✅ **SSL/TLS encryption** on both domains (Let's Encrypt)
+- ✅ **351 indexed research papers** with semantic search
+- ✅ **Natural language chat interface**
+- ✅ **Paper library browser** (351 papers, paginated)
+- ✅ **Source citations** with confidence scores
+- ✅ **Evidence trail** for verification
+- ✅ **API authentication** (API key required for most endpoints)
 
-### System Capabilities
-- **351 indexed research papers** with semantic search
-- **343 auto-generated summaries**
-- **93 organized collections**
-- **Sub-200ms API response time**
-- **Query endpoint** for natural language questions
+### User Interface Features
+- **Chat Interface:** Ask natural language questions
+- **Browse Library:** Explore 351 papers with pagination
+- **Source Citations:** View referenced sources with confidence scores
+- **Evidence Trail:** Trace back to original papers
+- **Statistics Dashboard:** Real-time corpus statistics
 
 ---
 
@@ -104,7 +108,7 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 ```
 
 ### Health Check Endpoint
-- **URL:** `https://rag.orebit.id/api/rag/health`
+- **URL:** `https://api.orebit.id/api/rag/health`
 - **Method:** GET
 - **Response:** JSON with system status and corpus information
 
@@ -115,20 +119,31 @@ The Orebit RAG (Retrieval-Augmented Generation) system is deployed and operation
 ### Public URLs
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **Landing Page** | https://rag.orebit.id/ | System overview and API documentation |
-| **Health Check** | https://rag.orebit.id/api/rag/health | System status verification |
-| **Query API** | https://rag.orebit.id/api/rag/query | Query the RAG system |
+| **React UI** | https://rag.orebit.id/ | Full RAG search interface |
+| **Health Check** | https://api.orebit.id/api/rag/health | System status verification |
+| **Statistics** | https://api.orebit.id/api/rag/stats | Corpus statistics |
+| **Query API** | https://api.orebit.id/api/rag/query or /answer | Query the RAG system |
+| **Browse API** | https://api.orebit.id/api/rag/browse | Browse papers |
 
 ### API Usage Example
 
 ```bash
-# Check system health
-curl https://rag.orebit.id/api/rag/health
+# Check system health (no auth required)
+curl https://api.orebit.id/api/rag/health
 
-# Query the RAG system (POST request)
-curl -X POST https://rag.orebit.id/api/rag/query \
+# Get statistics (API key required)
+curl -H "x-api-key: orebit-rag-api-key-2026-03-26-temp" \
+  https://api.orebit.id/api/rag/stats
+
+# Browse papers (API key required)
+curl -H "x-api-key: orebit-rag-api-key-2026-03-26-temp" \
+  "https://api.orebit.id/api/rag/browse?page=1&limit=10"
+
+# Query the RAG system (API key required)
+curl -X POST https://api.orebit.id/api/rag/answer \
   -H "Content-Type: application/json" \
-  -d '{"query": "What is machine learning?"}'
+  -H "x-api-key: orebit-rag-api-key-2026-03-26-temp" \
+  -d '{"query": "What is machine learning?", "top_k": 5}'
 ```
 
 ---
@@ -138,22 +153,30 @@ curl -X POST https://rag.orebit.id/api/rag/query \
 ### VPS Configuration (Frontend)
 - **IP Address:** 43.157.201.50
 - **Operating System:** Ubuntu 24.04 LTS
-- **Web Server:** Nginx (reverse proxy)
-- **SSL Certificate:** Let's Encrypt (rag.orebit.id)
-- **Domain:** rag.orebit.id (DNS configured to 43.157.201.50)
+- **Web Server:** Nginx (reverse proxy + static file serving)
+- **SSL Certificate:** Let's Encrypt (rag.orebit.id, api.orebit.id)
+- **Domains:**
+  - rag.orebit.id → React UI + API proxy
+  - api.orebit.id → API proxy only
+- **UI Directory:** /var/www/rag-ui
+- **Nginx Config:** /etc/nginx/sites-enabled/rag-orebit-id
 
 ### QwenPaw Configuration (Backend)
-- **IP Address:** 103.139.244.177 (internal only)
-- **API Port:** 3004
-- **Console Port:** 8088
+- **IP Address:** Private (10.x.x.x, no public IP)
+- **API Port:** 3004 (bind: 0.0.0.0)
+- **API Wrapper:** Node.js/Express
 - **Vector Database:** ChromaDB
-- **LLM Integration:** 9router + openai/gpt-oss-120b:free
+- **LLM Integration:** openai/gpt-oss-120b:free
+- **Authentication:** API key (orebit-rag-api-key-2026-03-26-temp)
+- **Loopback Bypass:** Requests from localhost exempt from API key
 
 ### Cloudflare Tunnel
 - **Type:** Quick Tunnel (trycloudflare.com)
-- **URL:** https://opposite-fountain-corrected-organized.trycloudflare.com
+- **URL:** https://venture-stud-gale-fuji.trycloudflare.com
 - **Status:** Active with auto-restart
 - **Protocol:** HTTP/QUIC
+- **Target:** http://127.0.0.1:3004 (QwenPaw API wrapper)
+- **Auto-Restart:** wrapper script + cron monitoring
 
 ---
 
@@ -167,72 +190,69 @@ curl -X POST https://rag.orebit.id/api/rag/query \
 sudo systemctl status nginx
 
 # View Nginx error logs
-sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/rag-orebit-id-error.log
 
 # View Nginx access logs
-sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/rag-orebit-id-access.log
 
 # Test domain connectivity
-curl https://rag.orebit.id/api/rag/health
+curl https://api.orebit.id/api/rag/health
 ```
 
 #### On QwenPaw:
 ```bash
+# Check API wrapper status
+ps aux | grep "node.*index.js" | grep -v grep
+
 # Check tunnel processes
 ps aux | grep cloudflared | grep -v grep
 
-# Check API status
+# Check API status (local)
 curl http://127.0.0.1:3004/api/rag/health
 
+# Check API status (via tunnel)
+curl https://venture-stud-gale-fuji.trycloudflare.com/api/rag/health
+
 # View tunnel logs
-tail -f /tmp/cloudflared-tunnel.log
+tail -f /tmp/cloudflared-tunnel-*.log
 
 # View wrapper logs
 tail -f /tmp/cloudflared-wrapper.log
-
-# View health check logs
-cat /tmp/cloudflared-restart.log
-
-# Check cron jobs
-crontab -l | grep cloudflared
 ```
-
-### Auto-Restart System
-
-The system features **dual-layer auto-restart** protection:
-
-1. **Immediate Restart (cloudflared-wrapper.sh)**
-   - Auto-restarts cloudflared on crash (up to 100 attempts)
-   - 10-second delay between restarts
-   - Monitors by PID file
-
-2. **Periodic Check (check-cloudflared.sh)**
-   - Runs every 5 minutes via cron
-   - Checks wrapper, cloudflared, and API health
-   - Auto-restarts if any component fails
-   - Logs all checks to `/tmp/cloudflared-restart.log`
 
 ### Restart Procedures
 
-#### Restart Cloudflare Tunnel (if needed):
+#### Restart API Wrapper (QwenPaw):
 ```bash
-# On QwenPaw
-pkill -f "cloudflared"
-sleep 2
-nohup bash /app/working/workspaces/default/orebit-ops/cloudflared-wrapper.sh > /dev/null 2>&1 &
-
-# Verify
-ps aux | grep cloudflared | grep -v grep
+cd /app/working/workspaces/default/orebit-ops/rag-system/api-wrapper
+bash start-wrapper.sh
 ```
 
-#### Restart Nginx (if needed):
+#### Restart Cloudflare Tunnel (QwenPaw):
+```bash
+# Kill old tunnel
+pkill -f cloudflared
+sleep 2
+
+# Start new tunnel
+nohup cloudflared tunnel --url http://127.0.0.1:3004 > /tmp/cloudflared-tunnel-$(date +%Y%m%d-%H%M%S).log 2>&1 &
+
+# Get new tunnel URL
+tail -50 /tmp/cloudflared-tunnel-*.log | grep -oP 'https://[^ ]+\.trycloudflare\.com' | tail -1
+
+# Update VPS Nginx with new URL
+# (see vps-update-tunnel-url.sh)
+```
+
+#### Restart Nginx (VPS):
 ```bash
 # On VPS
+sudo nginx -t
 sudo systemctl restart nginx
 
 # Verify
 sudo systemctl status nginx
-curl https://rag.orebit.id/api/rag/health
+curl https://api.orebit.id/api/rag/health
 ```
 
 ---
@@ -241,6 +261,7 @@ curl https://rag.orebit.id/api/rag/health
 
 ### Current Performance
 - **API Response Time:** < 200ms
+- **UI Page Load:** < 1s
 - **Papers Indexed:** 351 research papers
 - **Queries Supported:** Natural language queries
 - **Concurrent Users:** Configured for high availability
@@ -255,22 +276,32 @@ curl https://rag.orebit.id/api/rag/health
 ## 🔒 Security Considerations
 
 ### Security Measures
-- ✅ SSL/TLS encryption (Lets Encrypt certificates)
+- ✅ SSL/TLS encryption (Let's Encrypt certificates)
 - ✅ Encrypted Cloudflare tunnel (HTTP/QUIC)
-- ✅ Private QwenPaw network (internal IP only)
-- ✅ Frontend-backend separation
+- ✅ Private QwenPaw network (no public IP)
+- ✅ API key authentication for sensitive endpoints
+- ✅ CORS properly configured
 - ✅ No direct database access from public
-- ✅ API read-only mode configured
+- ✅ Rate limiting configured
+- ✅ Security headers (X-Frame-Options, CSP, etc.)
+
+### API Authentication
+- **Health endpoint:** No auth required (public monitoring)
+- **Other endpoints:** API key required (x-api-key header)
+- **API Key:** orebit-rag-api-key-2026-03-26-temp
+- **Loopback bypass:** Local requests exempt from auth
 
 ### Security Architecture
 ```
 Public Internet
     ↓ [SSL/TLS]
-VPS (Public) - rag.orebit.id
+VPS (Public) - rag.orebit.id/api.orebit.id
     ↓ [Encrypted Tunnel]
 Cloudflare Tunnel
     ↓ [Private Network]
-QwenPaw (Internal) - ChromaDB
+QwenPaw (Internal) - API Wrapper
+    ↓ [Vector Search]
+ChromaDB
 ```
 
 ---
@@ -280,40 +311,41 @@ QwenPaw (Internal) - ChromaDB
 ### Key Documentation Files
 | File | Purpose |
 |------|---------|
-| **README.md** | This file - System overview |
-| **DEPLOYMENT_FINAL_STATUS.txt** | Current deployment status |
-| **DEPLOYMENT_COMPLETE_NEXT_STEPS.md** | Future roadmap |
-| **CLOUDFLARED_AUTORESTART_COMPLETE.md** | Auto-restart documentation |
-| **UI_SOLUTION_OPTIONS.md** | UI architecture decisions |
+| **README.md** | This file - System overview and canonical documentation |
+| **SOP.md** | Standard Operating Procedures |
+| **DEPLOYMENT.md** | Deployment documentation |
+| **VERCEL_VS_VPS_DECISION.md** | VPS vs Vercel deployment analysis |
+| **vps-deploy-rag.sh** | VPS deployment script |
+| **vps-update-tunnel-url.sh** | VPS tunnel URL update script |
 
-### Historical Documentation
-All previous deployment documentation is available in git history and referenced files:
-- `ARCHITECTURE_QUICK_REF.md` - Architecture quick reference
-- `CORRECT_ARCHITECTURE_DEPLOYMENT.md` - Architecture decisions
-- `SYSTEM_ARCHITECTURE_ANALYSIS.md` - Technical analysis
-- `VPS_DEPLOYMENT_GUIDE.md` - VPS deployment guide
-- And many more (see git log)
+### Quick Reference
+See repository for additional documentation:
+- Architecture guides (ARCHITECTURE_*.md)
+- Deployment guides (DEPLOYMENT_*.md)
+- SOPs (docs/, docs/operations/)
+- Runbooks (docs/runbooks/)
 
 ---
 
 ## 🎯 Deployment History
 
 ### Key Milestones
-- **2026-05-02:** Initial deployment complete
-- **2026-05-02:** Landing page implementation
+- **2026-05-02:** Initial deployment complete (landing page only)
 - **2026-05-02:** Auto-restart system finalized
-- **2026-05-02:** Production-ready verification
+- **2026-05-03:** Full React UI deployed (rag.orebit.id)
+- **2026-05-03:** Active tunnel updated (venture-stud-gale-fuji)
+- **2026-05-03:** Production-ready verification complete
 
 ### Git History
 ```bash
 # View deployment history
-git log --oneline --all | grep -E "DEPLOY|RAG|VPS"
+git log --oneline --all | grep -E "DEPLOY|RAG|VPS|UI"
 
 # Latest commits:
-9e39d31 ✅ STEP2 COMPLETE: Cloudflared auto-restart setup finalized
-b87c1aa feat: add landing page solution for rag.orebit.id root 404 issue
-bdc8a6f 🎉 DEPLOYMENT COMPLETE - rag.orebit.id live and working
-...
+e483c93 🚀 FIX: New active Cloudflare tunnel URL deployed
+003c49f 📋 ADD: Deployment ready status and next steps
+f6eb0ff 🚀 ADD: VPS-side deployment script
+1eb2459 📋 ADD: Quick action summary for RAG UI deployment
 ```
 
 ---
@@ -321,19 +353,19 @@ bdc8a6f 🎉 DEPLOYMENT COMPLETE - rag.orebit.id live and working
 ## 🚀 Future Enhancements
 
 ### Planned Improvements
-- [ ] Create persistent Cloudflare named tunnel (persistent URL)
-- [ ] Setup advanced monitoring and alerting
+- [ ] Create persistent Cloudflare named tunnel (stable URL)
+- [ ] Implement server-side UI caching
+- [ ] Add advanced analytics dashboard
 - [ ] Implement query rate limiting
-- [ ] Add API authentication layer
-- [ ] Performance optimization for high load
-- [ ] Backup and disaster recovery procedures
+- [ ] Add backup and disaster recovery procedures
+- [ ] Setup comprehensive monitoring and alerting
 
 ### Optional Production Upgrades
+- [ ] Deploy to Vercel for CDN + global scaling (alternative to VPS-only)
 - [ ] Upgrade to named Cloudflare tunnel (persistent subdomain)
-- [ ] Add CDN caching for API responses
-- [ ] Implement query analytics dashboard
-- [ ] Setup Prometheus + Grafana monitoring
+- [ ] Implement Prometheus + Grafana monitoring
 - [ ] Add automated testing pipeline
+- [ ] Setup log aggregation (ELK stack)
 
 ---
 
@@ -344,26 +376,26 @@ bdc8a6f 🎉 DEPLOYMENT COMPLETE - rag.orebit.id live and working
 - **Branch:** main
 
 ### Documentation Locations
-- **Quick Reference:** See `ARCHITECTURE_QUICK_REF.md`
-- **Troubleshooting:** See documentation in repository
-- **Architecture:** See `CORRECT_ARCHITECTURE_DEPLOYMENT.md`
-
-### Contact
-For system support, see repository documentation or team members.
+- **Quick Reference:** See ARCHITECTURE_QUICK_REF.md
+- **SOP:** See SOP.md
+- **Deployment:** See docs/operations/deployment/
+- **Troubleshooting:** See repository documentation
 
 ---
 
 ## ✅ Verification Checklist
 
 When accessing the system, verify:
-- [ ] Landing page loads at https://rag.orebit.id/
-- [ ] Health check returns HTTP 200 at https://rag.orebit.id/api/rag/health
+- [ ] React UI loads at https://rag.orebit.id/
+- [ ] Health check returns HTTP 200 at https://api.orebit.id/api/rag/health
 - [ ] Papers count shows 351 in health check
-- [ ] SSL certificate is valid (check browser)
+- [ ] Browse API works (returns paper list)
+- [ ] Chat function works (test query)
+- [ ] SSL certificates valid on both domains
 - [ ] API response time < 200ms
 - [ ] Tunnel processes running on QwenPaw
+- [ ] API wrapper running on QwenPaw
 - [ ] Nginx running on VPS
-- [ ] Cron jobs active on QwenPaw
 
 ---
 
@@ -371,17 +403,59 @@ When accessing the system, verify:
 
 **The Orebit RAG System** is a production-ready AI-powered research platform deployed at `https://rag.orebit.id`, featuring:
 
-- 🌐 Public accessibility with SSL/TLS encryption
-- 🔍 351 indexed research papers with semantic search
-- 🚀 Sub-200ms API response time
-- 🛠️ Auto-restart capability with dual-layer monitoring
-- 🏗️ Frontend-backend separation for security
-- 📊 Real-time health monitoring
-- 📝 Comprehensive documentation
+- 🌐 **Full Stack React UI** with natural language search
+- 🔍 **351 indexed research papers** with semantic search
+- 💬 **Chat interface** with source citations
+- 📘 **Paper library browser** with pagination
+- 🚀 **Sub-200ms API response time**
+- 🔒 **Secure architecture** (SSL + tunnel + API auth)
+- 📊 **Real-time monitoring** and health checks
+- 🛠️ **Auto-restart capability** for backend services
 
-**Status:** ✅ **Live and Operational**
+**Status:** ✅ **Live and Operational - Production Ready**
 
-**Last Updated:** 2026-05-02
+**Last Updated:** 2026-05-03
+
+---
+
+## 🚀 Quick Commands
+
+### From QwenPaw:
+```bash
+# Check API health
+curl http://127.0.0.1:3004/api/rag/health
+
+# Check tunnel status
+ps aux | grep cloudflared | grep -v grep
+
+# View tunnel logs
+tail -f /tmp/cloudflared-tunnel-*.log
+```
+
+### From VPS:
+```bash
+# Check Nginx status
+sudo systemctl status nginx
+
+# Test API
+curl https://api.orebit.id/api/rag/health
+
+# View logs
+sudo tail -f /var/log/nginx/rag-orebit-id-error.log
+```
+
+### From External:
+```bash
+# Test UI
+open https://rag.orebit.id
+
+# Test API
+curl https://api.orebit.id/api/rag/health
+
+# Test with API key
+curl -H "x-api-key: orebit-rag-api-key-2026-03-26-temp" \
+  https://api.orebit.id/api/rag/stats
+```
 
 ---
 
