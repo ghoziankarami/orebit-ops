@@ -1,0 +1,151 @@
+﻿🚀 **DEPLOYMENT READY - NEXT STEPS (VPS)**
+
+---
+
+## ✅ **QWENPAW STATUS: ALL SYSTEMS GO!**
+
+### **Services Running:**
+- ✅ **API Wrapper**: Healthy (PID 3848107, port 3004)
+- ✅ **Cloudflare Tunnel**: Active (URL below)
+- ✅ **351 Papers Indexed**
+- ✅ **UI Files Built** (197KB JS + 17KB CSS)
+
+### **Tunnel URL:**
+```
+https://reader-measuring-romance-rarely.trycloudflare.com
+```
+
+---
+
+## 🚀 **NEXT ACTION: DEPLOY TO VPS**
+
+### **STEP 1: Connect to VPS**
+```bash
+ssh root@43.157.201.50
+```
+
+### **STEP 2: Clone Repository**
+```bash
+git clone https://github.com/ghoziankarami/orebit-ops.git /root/orebit-ops
+cd /root/orebit-ops
+```
+
+### **STEP 3: Run Deployment Script**
+```bash
+bash vps-deploy-rag.sh
+```
+
+**Script akan:**
+1. ✅ Copy UI files ke `/var/www/rag-ui`
+2. ✅ Configure Nginx (serve UI + proxy API)
+3. ✅ Setup SSL certificate (jika belum ada)
+4. ✅ Test semua endpoints
+5. ✅ Done!
+
+---
+
+## 📡 **DNS CONFIGURATION**
+
+Pastikan DNS sudah di-set:
+
+```
+rag.orebit.id  →  A  43.157.201.50
+api.orebit.id  →  A  43.157.201.50
+```
+
+---
+
+## 🧪 **VERIFICATION SETELAH DEPLOY**
+
+### **Test 1: Browser (UI)**
+```
+https://rag.orebit.id
+
+Harus muncul:
+✅ React UI interface
+✅ Chat box
+✅ Browse library button
+✅ Statistics: 351 papers
+```
+
+### **Test 2: Command Line (API)**
+```bash
+# Health check
+curl https://api.orebit.id/api/rag/health
+
+# Statistics
+curl -H 'x-api-key: orebit-rag-api-key-2026-03-26-temp' \
+  https://api.orebit.id/api/rag/stats
+
+# Browse papers
+curl -H 'x-api-key: orebit-rag-api-key-2026-03-26-temp' \
+  "https://api.orebit.id/api/rag/browse?page=1&limit=5"
+```
+
+---
+
+## 🎯 **EXPECTED RESULT**
+
+```
+┌─────────────────────────────────────────┐
+│  rag.orebit.id (React UI)              │
+│  • Chat dengan RAG                      │
+│  • Browse 351 papers                    │
+│  • Citations dengan scores              │
+└─────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  api.orebit.id (Nginx)                 │
+│  • Proxy ke QwenPaw                     │
+│  • SSL certificates                     │
+│  • CORS configured                     │
+└─────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  QwenPaw (Backend)                      │
+│  • API Wrapper: 0.0.0.0:3004           │
+│  • 351 papers indexed                   │
+│  • RAG logic                            │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## 📋 **SUMMARY**
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| **QwenPaw API** | ✅ Ready | Running, 351 papers |
+| **Cloudflare Tunnel** | ✅ Active | reader-measuring-romance-rarely.trycloudflare.com |
+| **UI Files** | ✅ Ready | Built in rag-public/dist |
+| **VPS Script** | ✅ Pushed | vps-deploy-rag.sh (commit f6eb0ff) |
+| **VPS Deployment** | ⏳ Pending | User action needed |
+
+---
+
+## 🚀 **QUICK COMMANDS**
+
+**Deploy to VPS:**
+```bash
+ssh root@43.157.201.50
+git clone https://github.com/ghoziankarami/orebit-ops.git /root/orebit-ops
+bash /root/orebit-ops/vps-deploy-rag.sh
+```
+
+**Test:**
+```bash
+# UI
+open https://rag.orebit.id
+
+# API
+curl https://api.orebit.id/api/rag/health
+```
+
+---
+
+## ✅ **STATUS: READY FOR VPS DEPLOYMENT**
+
+QwenPaw sudah siap, VPS script sudah di GitHub!
+Jalankan commands di atas di VPS untuk menyelesaikan deployment!
