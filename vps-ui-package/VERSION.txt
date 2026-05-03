@@ -1,0 +1,20 @@
+﻿RAG Public UI Deployment Package
+=================================
+Commit: 8135054
+Date: 2026-04-08
+Built: May 2, 2026 (existing build)
+Deployed by: QwenPaw
+Host: QwenPaw (Local)
+Target: VPS (orebit-sumopod, 43.157.201.50)
+
+Latest Features in this build:
+- Surface corpus trust metrics
+- Show Obsidian paper summaries in UI
+- Strip JATS tags from source snippets
+- Improve library card readability
+- Hero density improvements
+- Typography matches Orebit showcase
+
+Notes:
+This package contains the latest RAG Public UI with improved UX and trust metric visualization.
+Deploy to VPS to update rag.orebit.id with these features.
